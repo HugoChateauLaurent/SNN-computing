@@ -1,3 +1,5 @@
+import numpy as np
+
 class Network():
 	"""Network containing a list of neurons and synapses
 
@@ -11,7 +13,7 @@ class Network():
 
 	def __init__(self, neurons, synapses, generators=[]):
 
-		self.matricize = matricize
+		'''self.matricize = matricize
 
 		if matricize:
 
@@ -32,10 +34,11 @@ class Network():
 			self.w = w
 			self.out_pre = np.zeros((d,))
 
-		else:
-			self.neurons = neurons
-			self.synapses = synapses
-			self.generators = generators
+		else:'''
+	
+		self.neurons = neurons
+		self.synapses = synapses
+		self.generators = generators
 
 	def step(self):
 		for neuron in self.neurons: # update all neurons
@@ -44,3 +47,4 @@ class Network():
 			generator.step()
 		for synapse in self.synapses: # update all synapses
 			synapse.step()
+

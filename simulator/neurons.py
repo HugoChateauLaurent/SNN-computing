@@ -30,17 +30,19 @@ class Neuron():
 	I = 0
 	out = 0
 
-	def __init__(self, m, V_init=0., V_reset=0., thr=1., amplitude=1., I_e=0.):
+	def __init__(self, m, V_init=0., V_reset=0., thr=1., amplitude=1., I_e=0., noise=0., seed=1):
 		self.m = m
 		self.V = V_init
 		self.V_reset = V_reset
 		self.thr = thr
 		self.amplitude = amplitude
 		self.I_e = I_e
+		rng = np.random.RandomState(seed)
+		self.noise = lambda: rng.normal(scale=noise)
 		
 
 	def step(self):
-		self.V = self.V * self.m + self.I # update V
+		self.V = self.V * self.m + self.I + self.noise() # update V
 		self.I = self.I_e # reset I with I_e
 		if self.V > self.thr: # check for spike
 			self.V = self.V_reset
@@ -73,14 +75,5 @@ class PoissonGenerator(Neuron):
 				self.out += 1
 			
 
-		self.I = self.I_e
-
-class Parrot(Neuron):
-	def __init__(self, I_e=0., amplitude=1.):
-		self.I_e = I_e
-		self.amplitude = amplitude
-
-	def step(self):
-		self.out = self.I
 		self.I = self.I_e
 

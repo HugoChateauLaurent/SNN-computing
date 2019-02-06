@@ -1,3 +1,6 @@
+import simulator as SNN
+import numpy as np
+
 def main():
 
 	'''A = Neuron(.009, I_e=.2)
@@ -23,16 +26,16 @@ def main():
 				plt.xlabel("Step")
 				plt.show()'''
 
-	duration = 100
+	'''duration = 100
 
-	A = Neuron(.99, I_e=0)
-	B = Neuron(.99, I_e=0.1)
+	A = SNN.Neuron(.99, I_e=0)
+	B = SNN.Neuron(.99, I_e=0.1)
 	input = np.zeros((10))
 	input[0] = 1
-	G = Generator(input)
+	G = SNN.SpikeTrain(input)
 
-	net = Network([B], [], [G])
-	sim = Simulator(net)
+	net = SNN.Network([B], [], [G])
+	sim = SNN.Simulator(net)
 
 	
 	sim.run(duration)
@@ -52,7 +55,39 @@ def main():
 	plt.matshow(sim.raster.T, cmap='gray', fignum=1)
 	plt.ylabel("Neurons")
 	plt.xlabel("Step")
-	plt.show()
+	plt.show()'''
+
+
+	
+
+	#input
+	if True:
+		input = SNN.PoissonGenerator(.05)
+	else:
+		spike_train = [0]*10
+		spike_train[0] = 1
+		input = SNN.SpikeTrain(spike_train)
+
+
+	A = SNN.Neuron(.96, noise=.005)
+	in_A = SNN.Synapse(input, A, w=.5, d=1)
+
+	B = SNN.Neuron(.94, noise=.02)
+	A_B = SNN.Synapse(A,B, w=.7, d=1)
+
+	net = SNN.Network([input,A,B], [in_A, A_B])
+	
+
+	raster = SNN.Raster([input,A,B])
+	multimeter = SNN.Multimeter([A,B])
+
+	sim = SNN.Simulator(net, [raster, multimeter])
+	sim.run(100)
+
+	print(raster.__dict__)
+
+	raster.plot()
+	multimeter.plot()
 
 
 

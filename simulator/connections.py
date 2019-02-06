@@ -1,3 +1,6 @@
+import numpy as np
+import simulator as SNN
+
 class Synapse():
 	"""Connection between two neurons
 
@@ -17,7 +20,7 @@ class Synapse():
 		self.pre = pre
 		self.post = post
 		self.w = np.array([w])
-		size = 1 if isinstance(pre, Neuron) else pre.size
+		size = 1 if isinstance(pre, SNN.Neuron) else pre.size
 		self.out_pre = np.zeros((d,size)) # store output of the presynaptic neuron during d timesteps
 		self.index = 0
 

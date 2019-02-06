@@ -1,3 +1,5 @@
+import numpy as np
+
 class Simulator():
 	"""Simulator
 
@@ -7,10 +9,11 @@ class Simulator():
         Network to simulate
 	"""
 
-	def __init__(self, network):
+	def __init__(self, network, detectors=[]):
 		self.network = network
+		self.detectors = detectors
 
-	def run(self, steps, multimeter=True, raster=True):
+	def run(self, steps):
 		"""Run the simulator
 
 	    Parameters
@@ -24,15 +27,13 @@ class Simulator():
 		# uncomment if implementing dt (but the project seems stepwise oriented)
 		# steps = int(np.round(float(seconds) / self.dt))
 
-		if multimeter:
-			self.multimeter = np.zeros((steps, len(self.network.neurons)))
-		if raster:
-			self.raster = np.zeros((steps, len(self.network.neurons)), dtype=bool)
+		for detector in self.detectors:
+			detector.init(steps)
 
 		for i in range(steps):
 			self.network.step()
 
-			if multimeter:
-				self.multimeter[i,:] = 	[neuron.V for neuron in self.network.neurons]
-			if raster:
-				self.raster[i,:] = 		[neuron.out > 0 for neuron in self.network.neurons]
+			for detector in self.detectors:
+				detector.step()
+
+

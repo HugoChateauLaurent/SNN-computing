@@ -1,3 +1,5 @@
+import numpy as np
+
 class Population():
 
 	def __init__(self, neurons):
@@ -18,4 +20,3 @@ class Population():
 		spiked = np.where(np.greater(self.V, self.thr))[0] # find spiking neurons
 		self.out[spiked] = self.amplitude[spiked] # send output
 		self.V[spiked] = self.V_reset[spiked] # reset voltage
-
