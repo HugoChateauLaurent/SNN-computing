@@ -7,11 +7,15 @@ class Simulator():
     ----------
     network : Network
         Network to simulate
+    detectors : List
+    	List of detectors
 	"""
 
-	def __init__(self, network, detectors=[]):
+	def __init__(self, network, detectors=[], seed=None):
 		self.network = network
 		self.detectors = detectors
+		if seed != None:
+			self.network.update_rng(np.random.RandomState(seed))
 
 	def run(self, steps):
 		"""Run the simulator
@@ -20,8 +24,6 @@ class Simulator():
 	    ----------
 	    steps : int
 	        Number of steps to simulate
-        multimeter : boolean (Default: True)
-        	Whether or not to record the membrane voltages of each neuron
 		"""
 		
 		# uncomment if implementing dt (but the project seems stepwise oriented)

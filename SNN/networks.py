@@ -1,17 +1,17 @@
 import numpy as np
 
 class Network():
-	"""Network containing a list of neurons and synapses
+	"""Network containing a list of nodes and synapses
 
     Parameters
     ----------
-    neurons : list
-        List of neurons in the network
+    nodes : list
+        List of nodes in the network
     synapses : list
-        List of synapses connecting neurons
+        List of synapses connecting nodes
     """
 
-	def __init__(self, neurons, synapses, generators=[]):
+	def __init__(self, nodes, synapses):
 
 		'''self.matricize = matricize
 
@@ -36,15 +36,15 @@ class Network():
 
 		else:'''
 	
-		self.neurons = neurons
+		self.nodes = nodes
 		self.synapses = synapses
-		self.generators = generators
 
 	def step(self):
-		for neuron in self.neurons: # update all neurons
-			neuron.step() 
-		for generator in self.generators: # update all generators
-			generator.step()
+		for node in self.nodes: # update all nodes
+			node.step()
 		for synapse in self.synapses: # update all synapses
 			synapse.step()
 
+	def update_rng(self, rng):
+		for node in self.nodes:
+			node.update_rng(rng)
