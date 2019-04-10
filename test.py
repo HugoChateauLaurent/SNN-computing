@@ -1,4 +1,4 @@
-import SNN
+import pySimulator as SNN
 import numpy as np
 
 def main():
