@@ -18,7 +18,7 @@ class Synapse():
 		self.pre = pre
 		self.post = post
 		self.w = w
-		self.out_pre = np.zeros((d)) # store output of the presynaptic neuron during d timesteps
+		self.out_pre = np.zeros((d+1)) # store output of the presynaptic neuron during d timesteps
 		self.index = 0
 
 	def step(self):
