@@ -15,11 +15,9 @@ class Raster():
 		self.index += 1
 
 	def plot(self):
-		plt.figure(figsize=(18,6))
 		plt.matshow(self.spikes.T, cmap='gray', fignum=1)
 		plt.ylabel("Targets")
 		plt.xlabel("Step")
-		plt.show()
 
 
 class Multimeter():
@@ -35,7 +33,6 @@ class Multimeter():
 		self.index += 1
 
 	def plot(self):
-		plt.figure(figsize=(18,6))
 		for i in range(len(self.targets)):
 			plt.subplot(len(self.targets),1,1+i)
 			plt.plot(self.V[:,i])
@@ -44,4 +41,3 @@ class Multimeter():
 			#plt.xticks(range(duration))
 
 		plt.xlabel("Step")
-		plt.show()
