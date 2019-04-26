@@ -2,6 +2,7 @@ package graph;
 
 import cells.LIF;
 import edges.Synapse;
+import java.awt.Canvas;
 import org.abego.treelayout.Configuration.Location;
 import layout.AbegoTreeLayout;
 import layout.RandomLayout;
@@ -14,20 +15,23 @@ import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import visualizer.AbstractVisualizer;
 
 public class MainApp extends Application {
 
-    Graph graph;
+    private Graph graph;
     
-    BorderPane window;
-    MenuBar menu; // top
-    PannableCanvas graph_workspace;
-    HBox log;
+    private BorderPane window;
+    private MenuBar menu; // top
+    private PannableCanvas graph_workspace;
+    private ScrollPane visualizers;
 
     @Override
     public void start(Stage primaryStage) {
@@ -44,8 +48,32 @@ public class MainApp extends Application {
         graph_workspace = graph.getCanvas();
         window.setCenter(graph_workspace);
         
-        log = new HBox();
-        window.setBottom(log);
+        
+        
+        
+        HBox visualizers_hbox = new HBox();
+        visualizers_hbox.setSpacing(20);
+        
+        
+        visualizers = new ScrollPane();
+        visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        visualizers.setContent(visualizers_hbox); 
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        
+        window.setBottom(visualizers);
         
         //menuBar.toFront();
 
@@ -55,7 +83,12 @@ public class MainApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        //exampleElements();
+        exampleElements();        
+        updateHierarchy();
+    }
+    
+    public ScrollPane getVisualizers() {
+        return visualizers;
     }
     
     public void updateHierarchy() {

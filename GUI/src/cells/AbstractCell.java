@@ -95,7 +95,6 @@ public abstract class AbstractCell implements ICell {
 
             @Override
             public void handle(MouseEvent mouseEvent) {
-                System.out.println("Dragging");
                 if (mouseEvent.getButton() == MouseButton.PRIMARY) {
                     
                     double offsetX = mouseEvent.getScreenX() + dragContext.x;
@@ -109,8 +108,7 @@ public abstract class AbstractCell implements ICell {
                             
                     view.relocate(offsetX, offsetY);
                     graph.getApp().updateHierarchy();
-                } else {
-                    System.out.println("right");
+                    
                 }
             }
         });
