@@ -1,11 +1,8 @@
 package graph;
 
 import cells.LIF;
-import edges.Connection;
+import edges.Synapse;
 import org.abego.treelayout.Configuration.Location;
-import edges.CorneredEdge;
-import edges.DoubleCorneredEdge;
-import edges.Edge;
 import layout.AbegoTreeLayout;
 import layout.RandomLayout;
 
@@ -18,40 +15,55 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
 
-    Graph graph = new Graph();
-    MenuBar menuBar = new MenuBar();
+    Graph graph;
+    
+    BorderPane window;
+    MenuBar menu; // top
+    PannableCanvas graph_workspace;
+    HBox log;
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Spiking simulator GUI");
         //primaryStage.setMaximized(true);
+        
+        window = new BorderPane();
 
-        final BorderPane root = new BorderPane();
+        
+        menu = makeMenu();
+        window.setTop(menu);
+        
+        graph = new Graph(this);
+        graph_workspace = graph.getCanvas();
+        window.setCenter(graph_workspace);
+        
+        log = new HBox();
+        window.setBottom(log);
+        
+        //menuBar.toFront();
 
-        // Add menu bar
-        makeMenu();
-        root.setTop(menuBar);
-
-        graph = new Graph();
-
-        root.setCenter(graph.getCanvas());
-
-        final Scene scene = new Scene(root, 1024, 768);
+        final Scene scene = new Scene(window, 1024, 768);
         scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
         primaryStage.setScene(scene);
-
         primaryStage.show();
 
-        exampleElements();
+        //exampleElements();
+    }
+    
+    public void updateHierarchy() {
+        menu.toFront();
     }
 
-    private void makeMenu() {
+    private MenuBar makeMenu() {
+        MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("File");
         MenuItem item = new MenuItem("Open");
         item.setOnAction(new EventHandler<ActionEvent>() {
@@ -177,6 +189,8 @@ public class MainApp extends Application {
         });
         menu.getItems().add(item);
         menuBar.getMenus().add(menu);
+        
+        return menuBar;
     }
     
     public void exampleElements() {
@@ -185,7 +199,7 @@ public class MainApp extends Application {
         LIF b = new LIF(.9,0,0,0,1,1,0,0);
         graph.getModel().addCell(a);
         graph.getModel().addCell(b);
-        graph.getModel().addEdge(new Connection(a,b,.5,0));
+        graph.getModel().addEdge(new Synapse(a,b,.5,1));
 
         graph.endUpdate();
         graph.layout(new AbegoTreeLayout(200, 200, Location.Top));

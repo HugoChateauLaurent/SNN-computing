@@ -1,6 +1,5 @@
 package cells;
 
-import graph.Connectable;
 import graph.Graph;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseButton;
@@ -15,7 +14,6 @@ import javafx.scene.shape.Rectangle;
 public class LIF extends Node implements Connectable {
     
     private boolean toConnect = false;
-    final Ellipse view = new Ellipse(100, 100);
     
     protected double m;
     protected double V;
@@ -35,6 +33,8 @@ public class LIF extends Node implements Connectable {
         this.thr = thr;
         this.I_e = I_e;
         this.noise = noise;
+        
+        this.view = new Ellipse(50, 50);
     }
     
     public void step() {
@@ -48,56 +48,6 @@ public class LIF extends Node implements Connectable {
             this.out = this.amplitude;
         } else {
             this.out = 0;
-        }
-    }
-    
-    public boolean getToConnect() {
-        return toConnect;
-    }
-    
-    public void updateToConnect(boolean toConnect) {
-        this.toConnect = toConnect;
-        this.updateColor();
-    }
-    
-    
-    
-    /*
-        View
-    */
-    
-    @Override
-    public Region getGraphic(Graph graph) {
-        this.updateColor();
-        view.setStroke(Color.BLACK);
-        view.setStrokeWidth(3);
-
-        final Pane pane = new Pane(view);
-        pane.setPrefSize(100, 100);
-        view.radiusXProperty().bind(pane.prefWidthProperty());
-        view.radiusYProperty().bind(pane.prefHeightProperty());
-        
-        view.toFront();
-        pane.toFront();
-        
-        view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent e) {
-                if (e.getButton() == MouseButton.SECONDARY) {
-                    updateToConnect(!toConnect); 
-                    graph.getModel().tryToConnect();
-                }
-            }
-        });
-
-        return pane;
-    }
-    
-    public void updateColor() {
-        if (toConnect) {
-            view.setFill(Color.GRAY);
-        } else {
-            view.setFill(Color.WHITE);
         }
     }
 

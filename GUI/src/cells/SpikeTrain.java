@@ -64,13 +64,14 @@ public class SpikeTrain extends Node {
         view.widthProperty().bind(pane.prefWidthProperty());
         view.heightProperty().bind(pane.prefHeightProperty());
         //CellGestures.makeResizable(pane);
+        Connectable this_connectable = (Connectable) this;
         
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent e) {
                 if (e.getButton() == MouseButton.SECONDARY) {
                     updateToConnect(!toConnect); 
-                    graph.getModel().tryToConnect();
+                    graph.getModel().tryToConnect(this_connectable);
                 }
             }
         });

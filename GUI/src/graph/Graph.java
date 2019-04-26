@@ -17,6 +17,7 @@ import javafx.scene.layout.Region;
 
 public class Graph {
 
+    private final MainApp app;
     private final Model model;
     private final PannableCanvas pannableCanvas;
     private final Map<IGraphNode, Region> graphics;
@@ -25,11 +26,12 @@ public class Graph {
     private final BooleanProperty useNodeGestures;
     private final BooleanProperty useViewportGestures;
 
-    public Graph() {
-        this(new Model());
+    public Graph(MainApp app) {
+        this(app, new Model());
     }
 
-    public Graph(Model model) {
+    public Graph(MainApp app, Model model) {
+        this.app = app;
         this.model = model;
         this.model.setGraph(this);
 
@@ -79,6 +81,10 @@ public class Graph {
         addEdges(getModel().getAllEdges());
         addCells(getModel().getAllCells());
     }
+    
+    public MainApp getApp() {
+        return app;
+    }
 
     public Model getModel() {
         return model;
@@ -90,10 +96,7 @@ public class Graph {
 
     public void beginUpdate() {
         pannableCanvas.getChildren().clear();
-    }
-    
-    public void restartUpdate() {
-        model.beginUpdate();
+        this.model.beginUpdate();
     }
 
     public void endUpdate() {

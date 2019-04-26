@@ -1,17 +1,18 @@
 package graph;
 
+import cells.Connectable;
 import edges.IEdge;
 import cells.ICell;
 import java.io.Serializable;
 import java.util.List;
 
 import cells.AbstractCell;
+import cells.Detector;
 import cells.LIF;
 import cells.Node;
-import detectors.IDetector;
-import detectors.Multimeter;
-import edges.Connection;
-import edges.Edge;
+import cells.Multimeter;
+import edges.DetectorEdge;
+import edges.Synapse;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,8 +46,6 @@ public class Model implements Serializable {
     private ObservableList<IEdge> allEdges;
     private transient ObservableList<IEdge> addedEdges;
     private transient ObservableList<IEdge> removedEdges;
-
-    private ObservableList<IDetector> allDetectors;
 
     private Graph graph;
 
@@ -83,8 +82,6 @@ public class Model implements Serializable {
         allEdges = FXCollections.observableArrayList();
         addedEdges = FXCollections.observableArrayList();
         removedEdges = FXCollections.observableArrayList();
-        
-        allDetectors = FXCollections.observableArrayList();
     }
 
     public void clearAddedLists() {
@@ -115,7 +112,7 @@ public class Model implements Serializable {
                 cell.updateRng(new Random(seed.longValue()));
             }
         }
-            
+
     }
 
     public Double askSeed() {
@@ -131,15 +128,14 @@ public class Model implements Serializable {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 150, 10, 10));
-        
-        gridPane.add(new Label("Seed:"), 0,0);
+
+        gridPane.add(new Label("Seed:"), 0, 0);
         TextField text = new TextField();
-        gridPane.add(text, 1,0);
-        
+        gridPane.add(text, 1, 0);
 
         dialog.getDialogPane().setContent(gridPane);
         Platform.runLater(() -> text.requestFocus());
-        
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == loginButtonType) {
                 return Double.parseDouble(text.getText());
@@ -195,13 +191,13 @@ public class Model implements Serializable {
         addedCells.add(cell);
     }
 
-    public void addEdge(ICell sourceCell, ICell targetCell) {
-        final IEdge edge = new Edge(sourceCell, targetCell);
-        addEdge(edge);
+    public void addSynapse(ICell pre, ICell post, double w, int d) {
+        final Synapse connection = new Synapse((Node) pre, (Node) post, w, d);
+        addEdge((IEdge) connection);
     }
-
-    public void addConnection(ICell pre, ICell post, double w, int d) {
-        final Connection connection = new Connection((Node) pre, (Node) post, w, d);
+    
+    public void addDetectorEdge(Node target, Detector detector) {
+        final DetectorEdge connection = new DetectorEdge((Node) target, detector);
         addEdge((IEdge) connection);
     }
 
@@ -212,40 +208,73 @@ public class Model implements Serializable {
         addedEdges.add(edge);
     }
 
-    public boolean tryToConnect() {
-        final ObservableList<Connectable> toConnect = FXCollections.observableArrayList();
+    public boolean tryToConnect(Connectable post) {
+        Connectable pre = null;
         Connectable iCell;
 
         for (final ICell cell : allCells) {
 
-            if (cell instanceof Connectable) {
+            if (cell instanceof Connectable && cell != post) {
                 iCell = (Connectable) cell;
 
                 if (iCell.getToConnect()) {
-                    toConnect.add(iCell);
+                    pre = iCell;
                 }
             }
         }
+                
+                
+        if (pre == null) {
+            return false;
+        } else {
+            
+            if (!(pre instanceof Detector) && !(post instanceof Detector)) {
+                
+                Pair params = askConnectionParameters();
+                if (params != null) {
+                    beginUpdate();
+                    addSynapse((ICell) pre, (ICell) post, (double) params.getKey(), (int) params.getValue());
+                    graph.endUpdate();
 
-        if (toConnect.size() == 2) {
-            Pair params = askConnectionParameters();
-            if (params != null) {
+                    pre.updateToConnect(false);
+                    post.updateToConnect(false);
+
+                    return true;
+                } else {
+                    pre.updateToConnect(false);
+                    post.updateToConnect(false);
+                    return false;
+                }
+            } else if (!(pre instanceof Detector) && post instanceof Detector) {
+                
+            
+                Node target = (Node) pre;
+                AbstractCell detector = (AbstractCell) post;
                 beginUpdate();
-                addConnection((ICell) toConnect.get(0), (ICell) toConnect.get(1), (double) params.getKey(), (int) params.getValue());
+                addDetectorEdge((Node) target, (Detector) detector);
                 graph.endUpdate();
-
-                toConnect.get(0).updateToConnect(false);
-                toConnect.get(1).updateToConnect(false);
-
+                
+                pre.updateToConnect(false);
+                post.updateToConnect(false);
                 return true;
+                
+            } else if (!(post instanceof Detector) && pre instanceof Detector) {
+                
+            
+                Node target = (Node) post;
+                AbstractCell detector = (AbstractCell) pre;
+                beginUpdate();
+                addDetectorEdge((Node) target, (Detector) detector);
+                graph.endUpdate();
+                
+                pre.updateToConnect(false);
+                post.updateToConnect(false);
+                return true;
+                
             } else {
-                toConnect.get(0).updateToConnect(false);
-                toConnect.get(1).updateToConnect(false);
                 return false;
             }
 
-        } else {
-            return false;
         }
     }
 
@@ -347,14 +376,6 @@ public class Model implements Serializable {
         removedEdges.clear();
     }
 
-    public void createLIF() {
-        Double[] params = askLIFParameters();
-        if (params != null) {
-            final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
-            this.addCell(lif);    
-        }
-    }
-    
     public Double[] askLIFParameters() {
         // Create the custom dialog.
         Dialog<Double[]> dialog = new Dialog<>();
@@ -368,26 +389,26 @@ public class Model implements Serializable {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 150, 10, 10));
-        
+
         String[] params_labels = {"Leakage constant", "V_init", "V_reset", "V_rest", "thr", "amplitude", "I_e", "noise"};
         double[] values = {.9, 0, 0, 0, 1, 1, 0, 0};
         List<TextField> fields = new LinkedList();
-        
+
         TextField text;
-        for (int i=0; i<params_labels.length; i++) {
-            gridPane.add(new Label(params_labels[i]+":"), (2*i)%4, (int) ((2*i)/4.0));
+        for (int i = 0; i < params_labels.length; i++) {
+            gridPane.add(new Label(params_labels[i] + ":"), (2 * i) % 4, (int) ((2 * i) / 4.0));
             text = new TextField(Double.toString(values[i]));
             fields.add(text);
-            gridPane.add(text, (2*i+1)%4, (int) ((2*i+1)/4.0));
+            gridPane.add(text, (2 * i + 1) % 4, (int) ((2 * i + 1) / 4.0));
         }
 
         dialog.getDialogPane().setContent(gridPane);
         Platform.runLater(() -> fields.get(0).requestFocus());
-        
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == loginButtonType) {
                 Double[] params = new Double[params_labels.length];
-                for (int i=0; i<params.length; i++) {
+                for (int i = 0; i < params.length; i++) {
                     params[i] = Double.parseDouble(fields.get(i).getText());
                 }
                 return params;
@@ -412,41 +433,40 @@ public class Model implements Serializable {
         return null;
 
     }
-    
+
     public void run() {
         Integer steps = askSteps();
         if (steps != null) {
             run(steps);
         }
     }
-    
+
     public void run(int steps) {
         init_detectors(steps);
-        for(int i=0; i<steps; i++) {
+        for (int i = 0; i < steps; i++) {
             this.step();
         }
     }
-    
+
     public void init_detectors(int steps) {
-        for (IDetector detector : allDetectors){
-            detector.init(steps);
+        Detector detector;
+        for (ICell cell : allCells) {
+            if (cell instanceof Detector) {
+                detector = (Detector) cell;
+                detector.init(steps);
+            }
         }
     }
-    
+
     public void step() {
-        
+
         // cells step
         for (ICell cell : allCells) {
             cell.step();
-        }        
+        }
         // edges step
         for (IEdge edge : allEdges) {
             edge.step();
-        }
-
-        // detectors step
-        for (IDetector detector : allDetectors) {
-            detector.step();
         }
     }
 
@@ -463,15 +483,14 @@ public class Model implements Serializable {
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 150, 10, 10));
-        
-        gridPane.add(new Label("Number of steps:"), 0,0);
+
+        gridPane.add(new Label("Number of steps:"), 0, 0);
         TextField text = new TextField();
-        gridPane.add(text, 1,0);
-        
+        gridPane.add(text, 1, 0);
 
         dialog.getDialogPane().setContent(gridPane);
         Platform.runLater(() -> text.requestFocus());
-        
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == loginButtonType) {
                 return Integer.parseInt(text.getText());
@@ -494,8 +513,7 @@ public class Model implements Serializable {
         }
         return null;
     }
-    
-    
+
     public void createRaster() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -508,14 +526,17 @@ public class Model implements Serializable {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void createMultimeter() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void createLIF() {
+        Double[] params = askLIFParameters();
+        if (params != null) {
+            final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+            this.addCell(lif);
+        }
     }
-    
-    /*public void createMultimeter() {
+
+    public void createMultimeter() {
         final Multimeter multimeter = new Multimeter();
-        this.addCell(lif);
-    }*/
-    
+        this.addCell(multimeter);
+    }
 
 }

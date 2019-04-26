@@ -5,7 +5,6 @@
  */
 package cells;
 
-import graph.Connectable;
 import java.util.Random;
 
 /**
@@ -29,10 +28,12 @@ public abstract class Node extends AbstractCell implements Connectable {
         this.rng = rng;
     }
     
-    public abstract void step();
-
     public double getOut() {
         return this.out;
+    }
+    
+    public void setOut(double out) {
+        this.out = out;
     }
 
     public double getI() {
