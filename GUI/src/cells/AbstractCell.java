@@ -86,12 +86,12 @@ public abstract class AbstractCell implements ICell {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getButton() == MouseButton.PRIMARY && mouseEvent.getClickCount() == 2) {
-                    updateParameters();
+                    doubleClick();
                 }
             }
         });
 
-        view.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
+        /*view.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
 
             @Override
             public void handle(MouseEvent mouseEvent) {
@@ -123,7 +123,7 @@ public abstract class AbstractCell implements ICell {
                     dragContext.y = view.getBoundsInParent().getMinY() * scale - mouseEvent.getScreenY();
                 }
             }
-        });
+        });*/
         
     
 
@@ -143,8 +143,8 @@ public abstract class AbstractCell implements ICell {
         }
     }
 
-    public void updateParameters() {
-        System.out.println("TODO");
+    public void doubleClick() {
+        System.out.println("TODO: update parameters for neuron");
     }
 
     public boolean getToConnect() {

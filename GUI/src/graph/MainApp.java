@@ -1,6 +1,9 @@
 package graph;
 
+import cells.AbstractCell;
+import cells.ICell;
 import cells.LIF;
+import cells.Multimeter;
 import edges.Synapse;
 import java.awt.Canvas;
 import org.abego.treelayout.Configuration.Location;
@@ -23,6 +26,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import visualizer.AbstractVisualizer;
+import visualizer.MultimeterVisualizer;
 
 public class MainApp extends Application {
 
@@ -53,30 +57,13 @@ public class MainApp extends Application {
         
         HBox visualizers_hbox = new HBox();
         visualizers_hbox.setSpacing(20);
-        
-        
+        visualizers_hbox.getChildren().add(new MultimeterVisualizer(this, new Multimeter(this)));
         visualizers = new ScrollPane();
         visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        visualizers.setContent(visualizers_hbox); 
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
-        visualizers_hbox.getChildren().add(new AbstractVisualizer(this));
+        visualizers.setContent(visualizers_hbox);
         
         window.setBottom(visualizers);
         
-        //menuBar.toFront();
-
         final Scene scene = new Scene(window, 1024, 768);
         scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
@@ -85,6 +72,10 @@ public class MainApp extends Application {
 
         exampleElements();        
         updateHierarchy();
+    }
+
+    public Graph getGraph() {
+        return graph;
     }
     
     public ScrollPane getVisualizers() {

@@ -96,10 +96,10 @@ public class Model implements Serializable {
     public void endUpdate() {
         // every cell must have a parent, if it doesn't, then the graphParent is
         // the parent
-        //attachOrphansToGraphParent(this.addedCells);
+        attachOrphansToGraphParent(this.addedCells);
 
         // remove reference to graphParent
-        //disconnectFromGraphParent(this.removedCells);
+        disconnectFromGraphParent(this.removedCells);
         // merge added & removed cells with all cells
         merge();
     }
@@ -227,17 +227,18 @@ public class Model implements Serializable {
         if (pre == null) {
             return false;
         } else {
+            beginUpdate();
             
             if (!(pre instanceof Detector) && !(post instanceof Detector)) {
                 
                 Pair params = askConnectionParameters();
                 if (params != null) {
-                    beginUpdate();
+                    
                     addSynapse((ICell) pre, (ICell) post, (double) params.getKey(), (int) params.getValue());
-                    graph.endUpdate();
 
                     pre.updateToConnect(false);
                     post.updateToConnect(false);
+                    graph.endUpdate();
 
                     return true;
                 } else {
@@ -250,12 +251,11 @@ public class Model implements Serializable {
             
                 Node target = (Node) pre;
                 AbstractCell detector = (AbstractCell) post;
-                beginUpdate();
                 addDetectorEdge((Node) target, (Detector) detector);
-                graph.endUpdate();
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
+                graph.endUpdate();
                 return true;
                 
             } else if (!(post instanceof Detector) && pre instanceof Detector) {
@@ -263,12 +263,11 @@ public class Model implements Serializable {
             
                 Node target = (Node) post;
                 AbstractCell detector = (AbstractCell) pre;
-                beginUpdate();
                 addDetectorEdge((Node) target, (Detector) detector);
-                graph.endUpdate();
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
+                graph.endUpdate();
                 return true;
                 
             } else {
@@ -535,7 +534,7 @@ public class Model implements Serializable {
     }
 
     public void createMultimeter() {
-        final Multimeter multimeter = new Multimeter();
+        final Multimeter multimeter = new Multimeter(graph.getApp());
         this.addCell(multimeter);
     }
 

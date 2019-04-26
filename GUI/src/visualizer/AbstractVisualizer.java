@@ -18,30 +18,36 @@ import javafx.scene.shape.Rectangle;
  *
  * @author ubuntu
  */
-public class AbstractVisualizer extends BorderPane {
+public abstract class AbstractVisualizer extends BorderPane {
     
-    private MainApp app;
-    private Detector detector;
+    protected MainApp app;
+    protected Detector detector;
     
-    public AbstractVisualizer (MainApp app) {
+    public AbstractVisualizer (MainApp app, Detector detector) {
         super();
+        System.out.println("super");
         this.app = app;
+        this.detector = detector;
         Button closeButton = new Button("x");
         closeButton.setOnAction(e -> {
             close();
         });
         
-        setBottom(new Rectangle(500,200));
         
         closeButton.prefWidthProperty().bind(this.widthProperty());
         
         
         setTop(closeButton);
+        
+        this.setPrefHeight(300);
+        this.setPrefWidth(500);
+        
     }
     
     public void close() {
         HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
         visualizers_hbox.getChildren().remove(this);
+        detector.setVisualizer(null);
     }
     
     

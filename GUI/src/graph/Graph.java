@@ -81,7 +81,7 @@ public class Graph {
         addEdges(getModel().getAllEdges());
         addCells(getModel().getAllCells());
     }
-    
+
     public MainApp getApp() {
         return app;
     }
@@ -110,16 +110,17 @@ public class Graph {
 
         // clean up the model
         model.endUpdate();
+        
+        System.out.println("__________");
+        System.out.println(pannableCanvas.getChildren().size());
+        for (Object child: pannableCanvas.getChildren()) {
+            System.out.println(child);
+        }
     }
 
     private void addEdges(List<IEdge> edges) {
-        edges.stream().map(edge -> {
-            try {
-                return getGraphic(edge);
-            } catch (final Exception e) {
-                throw new RuntimeException("failed to get graphic for " + edge, e);
-            }
-        }).forEach(edgeGraphic -> pannableCanvas.getChildren().add(edgeGraphic));
+        edges.stream().map(edge -> getGraphic(edge)).forEach(edgeGraphic -> 
+                pannableCanvas.getChildren().add(edgeGraphic));
     }
 
     private void addCells(List<ICell> cells) {
@@ -132,15 +133,10 @@ public class Graph {
     }
 
     public Region getGraphic(IGraphNode node) {
-        try {
-            if (!graphics.containsKey(node)) {
-                graphics.put(node, createGraphic(node));
-            }
-            return graphics.get(node);
-        } catch (final Exception e) {
-            e.printStackTrace();
-            throw e;
+        if (!graphics.containsKey(node)) {
+            graphics.put(node, createGraphic(node));
         }
+        return graphics.get(node);
     }
 
     public Region createGraphic(IGraphNode node) {

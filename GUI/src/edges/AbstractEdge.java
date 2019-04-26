@@ -88,6 +88,7 @@ public abstract class AbstractEdge implements IEdge {
             group.getChildren().add(endpoint);
 
             getChildren().add(group);
+            group.toBack();
 
         }
 

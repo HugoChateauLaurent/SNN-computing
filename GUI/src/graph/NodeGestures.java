@@ -14,9 +14,9 @@ public class NodeGestures {
     }
 
     public void makeDraggable(final Node node) {
-        /*node.setOnMousePressed(onMousePressedEventHandler);
+        node.setOnMousePressed(onMousePressedEventHandler);
         node.setOnMouseDragged(onMouseDraggedEventHandler);
-        node.setOnMouseReleased(onMouseReleasedEventHandler);*/
+        node.setOnMouseReleased(onMouseReleasedEventHandler);
     }
 
     

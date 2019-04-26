@@ -58,4 +58,9 @@ public class Raster extends Detector {
     public void updateToConnect(boolean toConnect) {
         this.toConnect = toConnect;
     }
+
+    @Override
+    public void createVisualizer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
