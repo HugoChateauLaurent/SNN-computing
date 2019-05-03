@@ -61,7 +61,9 @@ class LIF(AbstractNeuron):
 		
 
 	def step(self):
-		self.V = self.V * self.m + self.I + self.rng.normal(scale=self.noise) # update V
+		self.V = self.V * self.m + self.I
+		if self.noise > 0:
+			self.V += self.rng.normal(scale=self.noise) # update V
 		self.V = max(self.V_rest, self.V)
 		self.I = self.I_e # reset I with I_e
 		if self.V > self.thr: # check for spike

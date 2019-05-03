@@ -12,7 +12,7 @@ def main():
 
 
 	# create 2 noisy LIF (Sandia) neurons
-	A = SNN.LIF(.96, noise=.005)
+	A = SNN.LIF(.96)
 	B = SNN.LIF(.94, noise=.02)
 
 	# connect the input train to A, the Poisson generator to B, and A to B
