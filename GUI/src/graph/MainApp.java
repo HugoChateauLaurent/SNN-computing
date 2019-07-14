@@ -40,6 +40,8 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Spiking simulator GUI");
+        
+        // full screen
         //primaryStage.setMaximized(true);
         
         window = new BorderPane();
@@ -57,9 +59,8 @@ public class MainApp extends Application {
         
         HBox visualizers_hbox = new HBox();
         visualizers_hbox.setSpacing(20);
-        visualizers_hbox.getChildren().add(new MultimeterVisualizer(this, new Multimeter(this)));
         visualizers = new ScrollPane();
-        visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        //visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         visualizers.setContent(visualizers_hbox);
         
         window.setBottom(visualizers);
@@ -94,6 +95,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Open");
+                System.out.println("Open not implemented");
             }
         });
         menu.getItems().add(item);
@@ -103,6 +105,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save as");
+                System.out.println("Save as not implemented");
             }
         });
         menu.getItems().add(item);
@@ -112,6 +115,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save");
+                System.out.println("Save not implemented");
             }
         });
         menu.getItems().add(item);
@@ -157,7 +161,10 @@ public class MainApp extends Application {
             public void handle(ActionEvent t) {
                 final Model model = graph.getModel();
                 graph.getModel().beginUpdate();
-                graph.getModel().createMultimeter();
+                final Multimeter multimeter = graph.getModel().createMultimeter();
+                final HBox visualizers_hbox = (HBox) visualizers.getContent();
+                    visualizers_hbox.getChildren().add(new MultimeterVisualizer(multimeter.getApp(), multimeter, true));
+
                 graph.endUpdate();
             }
         });
@@ -201,6 +208,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().run();
+                updateVisualizers();
             }
         });
         menu.getItems().add(item);
@@ -232,5 +240,14 @@ public class MainApp extends Application {
     
     public static void main(String[] args) {
         launch(args);
+    }
+    
+    public void updateVisualizers() {
+        System.out.println("Updating visualizers");
+        final HBox visualizers_hbox = (HBox) visualizers.getContent();
+        for (Object o : visualizers_hbox.getChildren()) {
+            AbstractVisualizer visualizer = (AbstractVisualizer) o;
+            visualizer.visualize();
+        }
     }
 }

@@ -5,7 +5,7 @@
  */
 package visualizer;
 
-import cells.Detector;
+import cells.AbstractDetector;
 import graph.MainApp;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -21,14 +21,16 @@ import javafx.scene.shape.Rectangle;
 public abstract class AbstractVisualizer extends BorderPane {
     
     protected MainApp app;
-    protected Detector detector;
+    protected AbstractDetector detector;
     
-    public AbstractVisualizer (MainApp app, Detector detector) {
+    public AbstractVisualizer (MainApp app, AbstractDetector detector) {
         super();
         System.out.println("super");
         this.app = app;
         this.detector = detector;
         Button closeButton = new Button("x");
+        closeButton.setStyle("-fx-background-color: #000000; ");
+        closeButton.setAlignment(Pos.BASELINE_RIGHT);
         closeButton.setOnAction(e -> {
             close();
         });
@@ -49,6 +51,8 @@ public abstract class AbstractVisualizer extends BorderPane {
         visualizers_hbox.getChildren().remove(this);
         detector.setVisualizer(null);
     }
+    
+    public abstract void visualize();
     
     
 }

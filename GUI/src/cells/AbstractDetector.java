@@ -7,13 +7,13 @@ import graph.IGraphNode;
 import java.util.List;
 import visualizer.AbstractVisualizer;
 
-public abstract class Detector extends AbstractCell implements Connectable {
+public abstract class AbstractDetector extends AbstractCell implements Connectable {
 
     List<Node> targets;    
     protected boolean toConnect;
     protected AbstractVisualizer visualizer;
     
-    public Detector(List<Node> targets) {
+    public AbstractDetector(List<Node> targets) {
         this.targets = targets;
     }
     

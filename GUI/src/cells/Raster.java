@@ -17,7 +17,7 @@ import javafx.scene.layout.Region;
  *
  * @author ubuntu
  */
-public class Raster extends Detector {
+public class Raster extends AbstractDetector {
 
     private boolean[][] spikes;
     private int index;

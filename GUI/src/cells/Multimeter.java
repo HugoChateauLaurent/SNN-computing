@@ -27,7 +27,7 @@ import visualizer.MultimeterVisualizer;
  *
  * @author ubuntu
  */
-public class Multimeter extends Detector {
+public class Multimeter extends AbstractDetector {
 
     private double[][] V;
     private int index;
@@ -47,6 +47,10 @@ public class Multimeter extends Detector {
         this.V = new double[targets.size()][steps];
         this.index = 0;
     }
+    
+    public MainApp getApp() {
+        return app;
+    }
 
     public double[][] getV() {
         return V;
@@ -62,7 +66,7 @@ public class Multimeter extends Detector {
     }
 
     public void createVisualizer() {
-        visualizer = new MultimeterVisualizer(app, this);
+        visualizer = new MultimeterVisualizer(app, this, true);
         HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
         visualizers_hbox.getChildren().add(visualizer);
     }

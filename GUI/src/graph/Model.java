@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import cells.AbstractCell;
-import cells.Detector;
+import cells.AbstractDetector;
 import cells.LIF;
 import cells.Node;
 import cells.Multimeter;
@@ -171,6 +171,17 @@ public class Model implements Serializable {
     public ObservableList<ICell> getAllCells() {
         return allCells;
     }
+    
+    public ObservableList<AbstractDetector> getAllDetectors() {
+        ObservableList<AbstractDetector> detectors = FXCollections.observableArrayList();
+        for (ICell cell : allCells) {
+            if (cell instanceof AbstractDetector) {
+                detectors.add((AbstractDetector) cell);
+            }
+        }
+        
+        return detectors;
+    }
 
     public ObservableList<IEdge> getAddedEdges() {
         return addedEdges;
@@ -196,7 +207,7 @@ public class Model implements Serializable {
         addEdge((IEdge) connection);
     }
     
-    public void addDetectorEdge(Node target, Detector detector) {
+    public void addDetectorEdge(Node target, AbstractDetector detector) {
         final DetectorEdge connection = new DetectorEdge((Node) target, detector);
         addEdge((IEdge) connection);
     }
@@ -229,7 +240,7 @@ public class Model implements Serializable {
         } else {
             beginUpdate();
             
-            if (!(pre instanceof Detector) && !(post instanceof Detector)) {
+            if (!(pre instanceof AbstractDetector) && !(post instanceof AbstractDetector)) {
                 
                 Pair params = askConnectionParameters();
                 if (params != null) {
@@ -246,24 +257,24 @@ public class Model implements Serializable {
                     post.updateToConnect(false);
                     return false;
                 }
-            } else if (!(pre instanceof Detector) && post instanceof Detector) {
+            } else if (!(pre instanceof AbstractDetector) && post instanceof AbstractDetector) {
                 
             
                 Node target = (Node) pre;
                 AbstractCell detector = (AbstractCell) post;
-                addDetectorEdge((Node) target, (Detector) detector);
+                addDetectorEdge((Node) target, (AbstractDetector) detector);
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
                 graph.endUpdate();
                 return true;
                 
-            } else if (!(post instanceof Detector) && pre instanceof Detector) {
+            } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
                 
             
                 Node target = (Node) post;
                 AbstractCell detector = (AbstractCell) pre;
-                addDetectorEdge((Node) target, (Detector) detector);
+                addDetectorEdge((Node) target, (AbstractDetector) detector);
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
@@ -435,7 +446,9 @@ public class Model implements Serializable {
 
     public void run() {
         Integer steps = askSteps();
-        if (steps != null) {
+        if (steps <= 0) {
+            System.out.println("Running error: must indicate the number of steps (>0)");
+        } else {
             run(steps);
         }
     }
@@ -448,10 +461,10 @@ public class Model implements Serializable {
     }
 
     public void init_detectors(int steps) {
-        Detector detector;
+        AbstractDetector detector;
         for (ICell cell : allCells) {
-            if (cell instanceof Detector) {
-                detector = (Detector) cell;
+            if (cell instanceof AbstractDetector) {
+                detector = (AbstractDetector) cell;
                 detector.init(steps);
             }
         }
@@ -533,9 +546,10 @@ public class Model implements Serializable {
         }
     }
 
-    public void createMultimeter() {
+    public Multimeter createMultimeter() {
         final Multimeter multimeter = new Multimeter(graph.getApp());
         this.addCell(multimeter);
+        return multimeter;
     }
 
 }

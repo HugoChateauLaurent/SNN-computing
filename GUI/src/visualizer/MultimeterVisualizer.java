@@ -5,7 +5,7 @@
  */
 package visualizer;
 
-import cells.Detector;
+import cells.AbstractDetector;
 import cells.Multimeter;
 import graph.MainApp;
 import javafx.geometry.Pos;
@@ -26,13 +26,15 @@ import javafx.scene.shape.Rectangle;
  */
 public class MultimeterVisualizer extends AbstractVisualizer {
     
-    public MultimeterVisualizer (MainApp app, Detector detector) {
+    public MultimeterVisualizer (MainApp app, AbstractDetector detector, boolean visualize) {
         super(app, detector);
-        visualize();
+        if (visualize) {
+            visualize();
+        }
     }
     
+    @Override
     public void visualize() {
-        System.out.println("vis");
         VBox plotBox = new VBox(20);
         ScrollPane plots = new ScrollPane();
         plots.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -51,78 +53,9 @@ public class MultimeterVisualizer extends AbstractVisualizer {
         
         NumberAxis xAxis;
         NumberAxis yAxis;
-        LineChart<Number,Number> lineChart;
+        LineChart<Number,Number> lineChart = null;
         XYChart.Series series;
         
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
-        
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
-        lineChart = new LineChart<Number,Number>(xAxis,yAxis);
-        series = new XYChart.Series();
-        series.getData().add(new XYChart.Data(1,1));
-        series.getData().add(new XYChart.Data(2,7));
-        series.getData().add(new XYChart.Data(8,4));
-        lineChart.getData().add(series);
-        plotBox.getChildren().add(lineChart);
         
         for (int target=0; target<n_targets; target++) {
             xAxis = new NumberAxis();
@@ -130,8 +63,10 @@ public class MultimeterVisualizer extends AbstractVisualizer {
             lineChart = new LineChart<Number,Number>(xAxis,yAxis);
 
             series = new XYChart.Series();
-            for (int t=0; t<n_targets; t++) {
+            for (int t=0; t<V[target].length; t++) {
                 if (V != null){
+                    System.out.println("data:");
+                    System.out.println(V[target][t]);
                     series.getData().add(new XYChart.Data(t, V[target][t]));
                 }
             }
@@ -140,8 +75,10 @@ public class MultimeterVisualizer extends AbstractVisualizer {
             
         }
         
-        lineChart.prefWidthProperty().bind(plotBox.widthProperty());
-        plotBox.prefWidthProperty().bind(plots.widthProperty().subtract(20));
+        if (n_targets > 0) {
+            lineChart.prefWidthProperty().bind(plotBox.widthProperty());
+            plotBox.prefWidthProperty().bind(plots.widthProperty().subtract(20));
+        }
 
             
         
