@@ -66,7 +66,7 @@ public class MainApp extends Application {
         window.setBottom(visualizers);
         
         final Scene scene = new Scene(window, 1024, 768);
-        scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("design.css").toExternalForm());
 
         primaryStage.setScene(scene);
         primaryStage.show();

@@ -7,7 +7,7 @@ package edges;
 
 import cells.AbstractCell;
 import cells.AbstractDetector;
-import cells.Node;
+import cells.AbstractNode;
 import graph.Graph;
 import cells.ICell;
 import javafx.beans.binding.Binding;
@@ -33,7 +33,7 @@ import javafx.scene.text.Text;
 public class DetectorEdge extends AbstractEdge {
 
 
-    public DetectorEdge(Node target, AbstractDetector detector) {
+    public DetectorEdge(AbstractNode target, AbstractDetector detector) {
         super(target, detector);
         detector.getTargets().add(target);
         

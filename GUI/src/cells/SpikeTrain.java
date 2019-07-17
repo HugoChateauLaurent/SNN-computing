@@ -19,7 +19,9 @@ import javafx.scene.shape.Rectangle;
  *
  * @author ubuntu
  */
-public class SpikeTrain extends Node {
+public class SpikeTrain extends AbstractNode {
+    
+    private static int count = 1;
     
     private boolean toConnect = false;
     final Rectangle view = new Rectangle(50, 50);
@@ -29,7 +31,8 @@ public class SpikeTrain extends Node {
     
     
     public SpikeTrain(double[] train, double amplitude) {
-        super(amplitude);
+        super(amplitude, count);
+        count++;
         this.train = train;
     }
     
@@ -85,6 +88,16 @@ public class SpikeTrain extends Node {
         } else {
             view.setFill(Color.WHITE);
         }
+    }
+    
+    @Override
+    public int getCount() {
+        return count;
+    }
+
+    @Override
+    public void editProperties() {
+        System.out.println("Not implemented: spiketrain edit properties");
     }
         
         

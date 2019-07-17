@@ -6,7 +6,7 @@
 package cells;
 
 import cells.LIF;
-import cells.Node;
+import cells.AbstractNode;
 import graph.Graph;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,11 +19,14 @@ import javafx.scene.layout.Region;
  */
 public class Raster extends AbstractDetector {
 
+    private static int count = 1;
+    
     private boolean[][] spikes;
     private int index;
 
-    public Raster(List<Node> targets) {
-        super(targets);
+    public Raster(List<AbstractNode> targets) {
+        super(targets, count);
+        count++;
     }
 
     public Raster() {
@@ -36,7 +39,7 @@ public class Raster extends AbstractDetector {
     }
 
     public void step() {
-        Node node;
+        AbstractNode node;
         for (int i = 0; i < targets.size(); i++) {
             node = targets.get(i);
             spikes[index][i] = node.getOut() > 0;
@@ -62,5 +65,10 @@ public class Raster extends AbstractDetector {
     @Override
     public void createVisualizer() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public int getCount() {
+        return count;
     }
 }

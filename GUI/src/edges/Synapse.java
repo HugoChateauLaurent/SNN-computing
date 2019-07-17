@@ -5,7 +5,7 @@
  */
 package edges;
 
-import cells.Node;
+import cells.AbstractNode;
 import graph.Graph;
 import cells.ICell;
 import javafx.beans.binding.Binding;
@@ -30,14 +30,14 @@ import javafx.scene.text.Text;
  */
 public class Synapse extends AbstractEdge {
 
-    protected Node pre;
-    protected Node post;
+    protected AbstractNode pre;
+    protected AbstractNode post;
     protected double w;
     protected double[] out_pre;
 
     protected int index = 0;
 
-    public Synapse(Node pre, Node post, double w, int d) {
+    public Synapse(AbstractNode pre, AbstractNode post, double w, int d) {
         super(pre, post);
         this.pre = pre;
         this.post = post;

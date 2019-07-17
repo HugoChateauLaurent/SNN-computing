@@ -6,7 +6,7 @@
 package cells;
 
 import cells.LIF;
-import cells.Node;
+import cells.AbstractNode;
 import graph.Graph;
 import graph.MainApp;
 import java.util.LinkedList;
@@ -28,13 +28,16 @@ import visualizer.MultimeterVisualizer;
  * @author ubuntu
  */
 public class Multimeter extends AbstractDetector {
+    
+    private static int count = 1;
 
     private double[][] V;
     private int index;
     private MainApp app;
 
-    public Multimeter(List<Node> targets, MainApp app) {
-        super(targets);
+    public Multimeter(List<AbstractNode> targets, MainApp app) {
+        super(targets, count);
+        count++;
         this.view = new Rectangle(100, 100);
         this.app = app;
     }
@@ -69,6 +72,11 @@ public class Multimeter extends AbstractDetector {
         visualizer = new MultimeterVisualizer(app, this, true);
         HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
         visualizers_hbox.getChildren().add(visualizer);
+    }
+    
+    @Override
+    public int getCount() {
+        return count;
     }
 
 }

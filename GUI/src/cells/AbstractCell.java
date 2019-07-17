@@ -6,6 +6,7 @@ import java.util.List;
 
 import java.util.Random;
 import javafx.event.EventHandler;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -16,10 +17,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 public abstract class AbstractCell implements ICell {
+    
+    protected int ID;
 
     private final List<ICell> children = new ArrayList<>();
     private final List<ICell> parents = new ArrayList<>();
-    private boolean toConnect = false;
+    protected boolean toConnect = false;
     protected Shape view = null;
     final DragContext dragContext = new DragContext();
 
@@ -75,10 +78,11 @@ public abstract class AbstractCell implements ICell {
         Connectable this_connectable = (Connectable) this;
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
-            public void handle(MouseEvent e) {
-                if (e.getButton() == MouseButton.SECONDARY) {
-                    updateToConnect(!toConnect);
-                    graph.getModel().tryToConnect(this_connectable);
+            public void handle(MouseEvent event) {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = createContextMenu(event, graph);
+                    contextMenu.show(view, event.getScreenX(), event.getScreenY());
+                    
                 }
             }
         });
@@ -86,7 +90,9 @@ public abstract class AbstractCell implements ICell {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getButton() == MouseButton.PRIMARY && mouseEvent.getClickCount() == 2) {
-                    doubleClick();
+                    System.out.println("Connection mode: " + String.valueOf(!toConnect));
+                    updateToConnect(!toConnect);
+                    graph.getModel().tryToConnect(this_connectable);
                 }
             }
         });
@@ -155,5 +161,11 @@ public abstract class AbstractCell implements ICell {
         this.toConnect = toConnect;
         this.updateColor();
     }
+    
+    public abstract ContextMenu createContextMenu(MouseEvent menu, Graph graph);
+    
+    public abstract int getCount();
+    
+    
 
 }

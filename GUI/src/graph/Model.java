@@ -9,7 +9,7 @@ import java.util.List;
 import cells.AbstractCell;
 import cells.AbstractDetector;
 import cells.LIF;
-import cells.Node;
+import cells.AbstractNode;
 import cells.Multimeter;
 import edges.DetectorEdge;
 import edges.Synapse;
@@ -26,9 +26,11 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.util.Pair;
@@ -64,6 +66,16 @@ public class Model implements Serializable {
             @Override
             public void updateRng(Random rng) {
                 throw new UnsupportedOperationException("Update rng of root"); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public ContextMenu createContextMenu(MouseEvent menu, Graph graph) {
+                throw new UnsupportedOperationException("createContextMenu of root"); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public int getCount() {
+                throw new UnsupportedOperationException("root count"); //To change body of generated methods, choose Tools | Templates.
             }
         };
         // clear model, create lists
@@ -203,12 +215,12 @@ public class Model implements Serializable {
     }
 
     public void addSynapse(ICell pre, ICell post, double w, int d) {
-        final Synapse connection = new Synapse((Node) pre, (Node) post, w, d);
+        final Synapse connection = new Synapse((AbstractNode) pre, (AbstractNode) post, w, d);
         addEdge((IEdge) connection);
     }
     
-    public void addDetectorEdge(Node target, AbstractDetector detector) {
-        final DetectorEdge connection = new DetectorEdge((Node) target, detector);
+    public void addDetectorEdge(AbstractNode target, AbstractDetector detector) {
+        final DetectorEdge connection = new DetectorEdge((AbstractNode) target, detector);
         addEdge((IEdge) connection);
     }
 
@@ -260,9 +272,9 @@ public class Model implements Serializable {
             } else if (!(pre instanceof AbstractDetector) && post instanceof AbstractDetector) {
                 
             
-                Node target = (Node) pre;
+                AbstractNode target = (AbstractNode) pre;
                 AbstractCell detector = (AbstractCell) post;
-                addDetectorEdge((Node) target, (AbstractDetector) detector);
+                addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
@@ -272,9 +284,9 @@ public class Model implements Serializable {
             } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
                 
             
-                Node target = (Node) post;
+                AbstractNode target = (AbstractNode) post;
                 AbstractCell detector = (AbstractCell) pre;
-                addDetectorEdge((Node) target, (AbstractDetector) detector);
+                addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
@@ -386,69 +398,12 @@ public class Model implements Serializable {
         removedEdges.clear();
     }
 
-    public Double[] askLIFParameters() {
-        // Create the custom dialog.
-        Dialog<Double[]> dialog = new Dialog<>();
-        dialog.setTitle("LIF parameters");
-
-        // Set the button types.
-        ButtonType loginButtonType = new ButtonType("OK", ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-        GridPane gridPane = new GridPane();
-        gridPane.setHgap(10);
-        gridPane.setVgap(10);
-        gridPane.setPadding(new Insets(20, 150, 10, 10));
-
-        String[] params_labels = {"Leakage constant", "V_init", "V_reset", "V_rest", "thr", "amplitude", "I_e", "noise"};
-        double[] values = {.9, 0, 0, 0, 1, 1, 0, 0};
-        List<TextField> fields = new LinkedList();
-
-        TextField text;
-        for (int i = 0; i < params_labels.length; i++) {
-            gridPane.add(new Label(params_labels[i] + ":"), (2 * i) % 4, (int) ((2 * i) / 4.0));
-            text = new TextField(Double.toString(values[i]));
-            fields.add(text);
-            gridPane.add(text, (2 * i + 1) % 4, (int) ((2 * i + 1) / 4.0));
-        }
-
-        dialog.getDialogPane().setContent(gridPane);
-        Platform.runLater(() -> fields.get(0).requestFocus());
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
-                Double[] params = new Double[params_labels.length];
-                for (int i = 0; i < params.length; i++) {
-                    params[i] = Double.parseDouble(fields.get(i).getText());
-                }
-                return params;
-            }
-            return null;
-        });
-
-        boolean done = false;
-
-        while (!done) {
-            try {
-                Optional<Double[]> result = dialog.showAndWait();
-
-                return result.get();
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input");
-            } catch (NoSuchElementException e) {
-                System.out.println("No value");
-                done = true;
-            }
-        }
-        return null;
-
-    }
-
     public void run() {
         Integer steps = askSteps();
         if (steps <= 0) {
             System.out.println("Running error: must indicate the number of steps (>0)");
         } else {
+            init();
             run(steps);
         }
     }
@@ -539,7 +494,7 @@ public class Model implements Serializable {
     }
 
     public void createLIF() {
-        Double[] params = askLIFParameters();
+        final Double[] params = LIF.askParameters();
         if (params != null) {
             final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
             this.addCell(lif);
@@ -550,6 +505,12 @@ public class Model implements Serializable {
         final Multimeter multimeter = new Multimeter(graph.getApp());
         this.addCell(multimeter);
         return multimeter;
+    }
+
+    private void init() {
+        for (ICell cell : allCells) {
+            cell.init();
+        }
     }
 
 }

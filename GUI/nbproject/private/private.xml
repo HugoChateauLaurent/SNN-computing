@@ -5,9 +5,9 @@
         <group>
             <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/graph/MainApp.java</file>
             <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/visualizer/MultimeterVisualizer.java</file>
-            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/cells/Multimeter.java</file>
-            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/cells/Detector.java</file>
-            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/graph/Model.java</file>
+            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/visualizer/AbstractVisualizer.java</file>
+            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/cells/AbstractDetector.java</file>
+            <file>file:/home/ubuntu/Documents/Radboud/RA/SNN-computing/GUI/src/graph/Graph.java</file>
         </group>
     </open-files>
 </project-private>

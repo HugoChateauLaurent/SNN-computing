@@ -38,5 +38,9 @@ public interface ICell extends IGraphNode {
     public void step();
 
     public void updateRng(Random rng);
+    
+    default void init() {
+        // some cells parameters need to be initialized at the beginning of a simulation (e.g. LIF voltage)
+    }
 
 }
