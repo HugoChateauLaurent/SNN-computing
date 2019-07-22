@@ -39,46 +39,13 @@ import javafx.util.Pair;
 public class Model implements Serializable {
 
     private static final long serialVersionUID = 172247271876446110L;
-
-    private final ICell root;
-
+    
     private ObservableList<ICell> allCells;
-    private transient ObservableList<ICell> addedCells;
-    private transient ObservableList<ICell> removedCells;
-
     private ObservableList<IEdge> allEdges;
-    private transient ObservableList<IEdge> addedEdges;
-    private transient ObservableList<IEdge> removedEdges;
 
     private Graph graph;
 
     public Model() {
-        root = new AbstractCell() {
-            @Override
-            public Region getGraphic(Graph graph) {
-                return null;
-            }
-
-            @Override
-            public void step() {
-                throw new UnsupportedOperationException("Step of root"); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public void updateRng(Random rng) {
-                throw new UnsupportedOperationException("Update rng of root"); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public ContextMenu createContextMenu(MouseEvent menu, Graph graph) {
-                throw new UnsupportedOperationException("createContextMenu of root"); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            @Override
-            public int getCount() {
-                throw new UnsupportedOperationException("root count"); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
         // clear model, create lists
         clear();
     }
@@ -89,32 +56,7 @@ public class Model implements Serializable {
 
     public void clear() {
         allCells = FXCollections.observableArrayList();
-        addedCells = FXCollections.observableArrayList();
-        removedCells = FXCollections.observableArrayList();
-
         allEdges = FXCollections.observableArrayList();
-        addedEdges = FXCollections.observableArrayList();
-        removedEdges = FXCollections.observableArrayList();
-    }
-
-    public void clearAddedLists() {
-        addedCells.clear();
-        addedEdges.clear();
-    }
-
-    public void beginUpdate() {
-        this.root.getCellChildren().clear();
-    }
-
-    public void endUpdate() {
-        // every cell must have a parent, if it doesn't, then the graphParent is
-        // the parent
-        attachOrphansToGraphParent(this.addedCells);
-
-        // remove reference to graphParent
-        disconnectFromGraphParent(this.removedCells);
-        // merge added & removed cells with all cells
-        merge();
     }
 
     public void updateRng() {
@@ -173,14 +115,6 @@ public class Model implements Serializable {
 
     }
 
-    public ObservableList<ICell> getAddedCells() {
-        return addedCells;
-    }
-
-    public ObservableList<ICell> getRemovedCells() {
-        return removedCells;
-    }
-
     public ObservableList<ICell> getAllCells() {
         return allCells;
     }
@@ -196,14 +130,6 @@ public class Model implements Serializable {
         return detectors;
     }
 
-    public ObservableList<IEdge> getAddedEdges() {
-        return addedEdges;
-    }
-
-    public ObservableList<IEdge> getRemovedEdges() {
-        return removedEdges;
-    }
-
     public ObservableList<IEdge> getAllEdges() {
         return allEdges;
     }
@@ -212,7 +138,7 @@ public class Model implements Serializable {
         if (cell == null) {
             throw new NullPointerException("Cannot add a null cell");
         }
-        addedCells.add(cell);
+        allCells.add(cell);
     }
 
     public void addSynapse(ICell pre, ICell post, double w, int d) {
@@ -229,7 +155,7 @@ public class Model implements Serializable {
         if (edge == null) {
             throw new NullPointerException("Cannot add a null edge");
         }
-        addedEdges.add(edge);
+        allEdges.add(edge);
     }
 
     public boolean tryToConnect(Connectable post) {
@@ -251,7 +177,6 @@ public class Model implements Serializable {
         if (pre == null) {
             return false;
         } else {
-            beginUpdate();
             
             if (!(pre instanceof AbstractDetector) && !(post instanceof AbstractDetector)) {
                 
@@ -262,7 +187,6 @@ public class Model implements Serializable {
 
                     pre.updateToConnect(false);
                     post.updateToConnect(false);
-                    graph.endUpdate();
 
                     return true;
                 } else {
@@ -279,7 +203,6 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
-                graph.endUpdate();
                 return true;
                 
             } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
@@ -291,7 +214,6 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
-                graph.endUpdate();
                 return true;
                 
             } else {
@@ -353,50 +275,6 @@ public class Model implements Serializable {
         }
         return null;
 
-    }
-
-    /**
-     * Attach all cells which don't have a parent to graphParent
-     *
-     * @param cellList
-     */
-    public void attachOrphansToGraphParent(List<ICell> cellList) {
-        for (final ICell cell : cellList) {
-            if (cell.getCellParents().size() == 0) {
-                root.addCellChild(cell);
-            }
-        }
-    }
-
-    /**
-     * Remove the graphParent reference if it is set
-     *
-     * @param cellList
-     */
-    public void disconnectFromGraphParent(List<ICell> cellList) {
-        for (final ICell cell : cellList) {
-            root.removeCellChild(cell);
-        }
-    }
-
-    public ICell getRoot() {
-        return root;
-    }
-
-    public void merge() {
-        // cells
-        allCells.addAll(addedCells);
-        allCells.removeAll(removedCells);
-
-        addedCells.clear();
-        removedCells.clear();
-
-        // edges
-        allEdges.addAll(addedEdges);
-        allEdges.removeAll(removedEdges);
-
-        addedEdges.clear();
-        removedEdges.clear();
     }
 
     public void run() {
@@ -491,20 +369,22 @@ public class Model implements Serializable {
         this.addCell(raster);
         return raster;    }
 
-    public void createPoisson() {
+    public ICell createPoisson() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void createSpikeTrain() {
+    public ICell createSpikeTrain() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void createLIF() {
+    public ICell createLIF() {
         final Double[] params = LIF.askParameters();
+        ICell lif = null;
         if (params != null) {
-            final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+            lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
             this.addCell(lif);
         }
+        return lif;
     }
 
     public Multimeter createMultimeter() {

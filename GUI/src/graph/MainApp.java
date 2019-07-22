@@ -6,10 +6,9 @@ import cells.LIF;
 import cells.Multimeter;
 import cells.Raster;
 import edges.DetectorEdge;
+import edges.IEdge;
 import edges.Synapse;
 import java.awt.Canvas;
-import org.abego.treelayout.Configuration.Location;
-import layout.AbegoTreeLayout;
 import layout.RandomLayout;
 
 import javafx.application.Application;
@@ -141,9 +140,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().beginUpdate();
-                graph.getModel().createLIF();
-                graph.endUpdate();
+                ICell cell = graph.getModel().createLIF();
+                graph.addCell(cell);
             }
         });
         menu.getItems().add(item);
@@ -151,9 +149,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().beginUpdate();
-                graph.getModel().createSpikeTrain();
-                graph.endUpdate();
+                ICell cell = graph.getModel().createSpikeTrain();
+                graph.addCell(cell);
             }
         });
         menu.getItems().add(item);
@@ -161,9 +158,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().beginUpdate();
-                graph.getModel().createPoisson();
-                graph.endUpdate();
+                ICell cell = graph.getModel().createPoisson();
+                graph.addCell(cell);
             }
         });
         menu.getItems().add(item);
@@ -171,9 +167,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().beginUpdate();
-                graph.getModel().createMultimeter();
-                graph.endUpdate();
+                ICell cell = graph.getModel().createMultimeter();
+                graph.addCell(cell);
             }
         });
         menu.getItems().add(item);
@@ -181,9 +176,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().beginUpdate();
-                graph.getModel().createRaster();
-                graph.endUpdate();
+                ICell cell = graph.getModel().createRaster();
+                graph.addCell(cell);
             }
         });
         menu.getItems().add(item);
@@ -198,15 +192,8 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
-
-        item = new MenuItem("Abego");
-        item.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                graph.layout(new AbegoTreeLayout());
-            }
-        });
-        menu.getItems().add(item);
+        
+        
         menuBar.getMenus().add(menu);
 
         menu = new Menu("Controls");
@@ -232,33 +219,45 @@ public class MainApp extends Application {
     }
     
     public void exampleElements() {
-        graph.beginUpdate();
         
         //create neurons with constant input
         LIF neuron = new LIF(1,0,0,0,1,1,0.3,0);
-        LIF neuron2 = new LIF(0.8,0,0,0,1,1,0.3,0);
         graph.getModel().addCell(neuron);
+        graph.addCell(neuron);
+        
+        LIF neuron2 = new LIF(0.8,0,0,0,1,1,0.3,0);
         graph.getModel().addCell(neuron2);
+        graph.addCell(neuron2);
         
         //create detectors
         Raster raster = graph.getModel().createRaster();
         Multimeter multi = graph.getModel().createMultimeter();
         
         //connect detector and neurons
-        graph.getModel().addEdge(new DetectorEdge(neuron,raster));
-        graph.getModel().addEdge(new DetectorEdge(neuron2,raster));
-        graph.getModel().addEdge(new DetectorEdge(neuron,multi));
-        graph.getModel().addEdge(new DetectorEdge(neuron2,multi));
+        IEdge edge = new DetectorEdge(neuron,raster);
+        graph.getModel().addEdge(edge);
+        graph.addEdge(edge);
+        
+        edge = new DetectorEdge(neuron2,raster);
+        graph.getModel().addEdge(edge);
+        graph.addEdge(edge);
+        
+        edge = new DetectorEdge(neuron,multi);
+        graph.getModel().addEdge(edge);
+        graph.addEdge(edge);
+        
+        edge = new DetectorEdge(neuron2,multi);
+        graph.getModel().addEdge(edge);
+        graph.addEdge(edge);
         
         //open visualizers
         raster.displayVisualizer();
         multi.displayVisualizer();
-        
-        Group group = new Group();
-        group.getChildren().addAll(neuron.getGraphic(graph), neuron2.getGraphic(graph));
 
-        graph.endUpdate();
-        graph.layout(new AbegoTreeLayout(200, 200, Location.Top));
+        
+        graph.addCell(raster);
+        graph.addCell(multi);
+        graph.layout(new RandomLayout());
         
         
         

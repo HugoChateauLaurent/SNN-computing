@@ -24,9 +24,6 @@ public abstract class AbstractEdge implements IEdge {
         if (target == null) {
             throw new NullPointerException("Target cannot be null");
         }
-
-        source.addCellParent(target);
-        target.addCellChild(source);
     }
 
     @Override

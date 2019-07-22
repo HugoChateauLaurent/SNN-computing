@@ -77,9 +77,13 @@ public class Graph {
         });
 
         graphics = new HashMap<>();
-
-        addEdges(getModel().getAllEdges());
-        addCells(getModel().getAllCells());
+        
+        for (IEdge edge : getModel().getAllEdges()) {
+            addEdge(edge);
+        }
+        for (ICell cell : getModel().getAllCells()) {
+            addCell(cell);
+        }
     }
 
     public MainApp getApp() {
@@ -93,13 +97,8 @@ public class Graph {
     public PannableCanvas getCanvas() {
         return pannableCanvas;
     }
-
-    public void beginUpdate() {
-        pannableCanvas.getChildren().clear();
-        this.model.beginUpdate();
-    }
-
-    public void endUpdate() {
+    
+    /*public void endUpdate() {
         // add components to graph pane
         addEdges(model.getAddedEdges());
         addCells(model.getAddedCells());
@@ -116,20 +115,17 @@ public class Graph {
         for (Object child: pannableCanvas.getChildren()) {
             System.out.println(child);
         }
+    }*/
+
+    public void addEdge(IEdge edge) {
+        pannableCanvas.getChildren().add(edge.getGraphic(this));
     }
 
-    private void addEdges(List<IEdge> edges) {
-        edges.stream().map(edge -> getGraphic(edge)).forEach(edgeGraphic -> 
-                pannableCanvas.getChildren().add(edgeGraphic));
-    }
-
-    private void addCells(List<ICell> cells) {
-        cells.stream().map(cell -> getGraphic(cell)).forEach(cellGraphic -> {
-            pannableCanvas.getChildren().add(cellGraphic);
-            if (useNodeGestures.get()) {
-                nodeGestures.makeDraggable(cellGraphic);
-            }
-        });
+    public void addCell(ICell cell) {
+        pannableCanvas.getChildren().add(cell.getGraphic(this));
+        if (useNodeGestures.get()) {
+            nodeGestures.makeDraggable(cell.getGraphic(this));
+        }
     }
 
     public Region getGraphic(IGraphNode node) {
