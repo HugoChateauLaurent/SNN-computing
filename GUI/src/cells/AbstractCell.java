@@ -30,6 +30,10 @@ public abstract class AbstractCell implements ICell {
     public void addCellChild(ICell cell) {
         children.add(cell);
     }
+    
+    public Shape getView() {
+        return view;
+    }
 
     @Override
     public List<ICell> getCellChildren() {
@@ -158,6 +162,7 @@ public abstract class AbstractCell implements ICell {
     }
 
     public void updateToConnect(boolean toConnect) {
+        System.out.println("updatetoconnect"+String.valueOf(toConnect));
         this.toConnect = toConnect;
         this.updateColor();
     }

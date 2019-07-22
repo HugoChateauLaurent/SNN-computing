@@ -11,6 +11,7 @@ import cells.AbstractDetector;
 import cells.LIF;
 import cells.AbstractNode;
 import cells.Multimeter;
+import cells.Raster;
 import edges.DetectorEdge;
 import edges.Synapse;
 import java.util.Collection;
@@ -413,15 +414,18 @@ public class Model implements Serializable {
         for (int i = 0; i < steps; i++) {
             this.step();
         }
+        updateVisualizers();
+    }
+    
+    public void updateVisualizers() {
+        for (AbstractDetector detector : getAllDetectors()) {
+            detector.getVisualizer().visualize();
+        }
     }
 
     public void init_detectors(int steps) {
-        AbstractDetector detector;
-        for (ICell cell : allCells) {
-            if (cell instanceof AbstractDetector) {
-                detector = (AbstractDetector) cell;
-                detector.init(steps);
-            }
+        for (AbstractDetector detector : getAllDetectors()) {
+            detector.init(steps);
         }
     }
 
@@ -481,9 +485,11 @@ public class Model implements Serializable {
         return null;
     }
 
-    public void createRaster() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public Raster createRaster() {
+        final Raster raster = new Raster(graph.getApp());
+        raster.createVisualizer();
+        this.addCell(raster);
+        return raster;    }
 
     public void createPoisson() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -503,6 +509,7 @@ public class Model implements Serializable {
 
     public Multimeter createMultimeter() {
         final Multimeter multimeter = new Multimeter(graph.getApp());
+        multimeter.createVisualizer();
         this.addCell(multimeter);
         return multimeter;
     }

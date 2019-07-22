@@ -5,12 +5,14 @@ import cells.ICell;
 import cells.AbstractNode;
 import graph.Graph;
 import graph.IGraphNode;
+import graph.MainApp;
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import visualizer.AbstractVisualizer;
 
 public abstract class AbstractDetector extends AbstractCell implements Connectable {
@@ -18,10 +20,13 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     List<AbstractNode> targets;    
     protected boolean toConnect;
     protected AbstractVisualizer visualizer;
+    protected MainApp app;
+
     
-    public AbstractDetector(List<AbstractNode> targets, int ID) {
+    public AbstractDetector(List<AbstractNode> targets, int ID, MainApp app) {
         this.targets = targets;
         this.ID = ID;
+        this.app = app;
     }
     
     public List<AbstractNode> getTargets() {
@@ -71,11 +76,11 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         });
         
         MenuItem openVisualizer = new MenuItem("Show recordings");
-        connect.setOnAction(new EventHandler<ActionEvent>() {
+        openVisualizer.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Opening visualizer");
-                openVisualizer();
+                displayVisualizer();
             }
         });
         
@@ -112,8 +117,13 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         System.out.println("Delete not implemented");
     }
     
-    public void openVisualizer() {
-        System.out.println("Open visualizer not implemented");
+    public void displayVisualizer() {
+        HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
+        visualizers_hbox.getChildren().add(visualizer);
+    }
+
+    public AbstractVisualizer getVisualizer() {
+        return visualizer;
     }
 
 }

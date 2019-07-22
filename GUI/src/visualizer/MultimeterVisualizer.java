@@ -60,24 +60,21 @@ public class MultimeterVisualizer extends AbstractVisualizer {
         for (int target=0; target<n_targets; target++) {
             xAxis = new NumberAxis();
             yAxis = new NumberAxis();
+            xAxis.labelProperty().set("Steps");
+            yAxis.labelProperty().set("Voltage");
             lineChart = new LineChart<Number,Number>(xAxis,yAxis);
 
             series = new XYChart.Series();
             for (int t=0; t<V[target].length; t++) {
                 if (V != null){
-                    System.out.println("data:");
-                    System.out.println(V[target][t]);
                     series.getData().add(new XYChart.Data(t, V[target][t]));
                 }
             }
             lineChart.getData().add(series);
+            lineChart.legendVisibleProperty().set(false);
             plotBox.getChildren().add(lineChart);
+            lineChart.setMaxHeight(70);
             
-        }
-        
-        if (n_targets > 0) {
-            lineChart.prefWidthProperty().bind(plotBox.widthProperty());
-            plotBox.prefWidthProperty().bind(plots.widthProperty().subtract(20));
         }
 
             

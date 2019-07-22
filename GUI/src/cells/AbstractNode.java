@@ -101,8 +101,34 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
             }
         });
         
+        /*
         
-        contextMenu.getItems().addAll(ID_label, connect, properties, delete);
+        LIF lif = (LIF) this;
+        
+        MenuItem front = new MenuItem("Front");
+        delete.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                graph.getModel().beginUpdate();
+                lif.getGraphic(graph).toFront();
+                graph.endUpdate();
+
+            }
+        });
+        
+        MenuItem back = new MenuItem("Back");
+        delete.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                graph.getModel().beginUpdate();
+                lif.getGraphic(graph).toBack();
+                graph.endUpdate();
+
+            }
+        });*/
+        
+        
+        contextMenu.getItems().addAll(ID_label, connect, properties, delete);//, front, back);
         
         return contextMenu;
         

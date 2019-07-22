@@ -8,10 +8,14 @@ package cells;
 import cells.LIF;
 import cells.AbstractNode;
 import graph.Graph;
+import graph.MainApp;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Rectangle;
+import visualizer.RasterVisualizer;
 
 /**
  *
@@ -21,20 +25,21 @@ public class Raster extends AbstractDetector {
 
     private static int count = 1;
     
-    private boolean[][] spikes;
+    private boolean[][] spikes; // [target][t]
     private int index;
 
-    public Raster(List<AbstractNode> targets) {
-        super(targets, count);
+    public Raster(List<AbstractNode> targets, MainApp app) {
+        super(targets, count, app);
         count++;
+        this.view = new Rectangle(100, 100);
     }
 
-    public Raster() {
-        this(new LinkedList());
+    public Raster(MainApp app) {
+        this(new LinkedList(), app);
     }
 
     public void init(int steps) {
-        this.spikes = new boolean[steps][targets.size()];
+        this.spikes = new boolean[targets.size()][steps];
         this.index = 0;
     }
 
@@ -42,14 +47,14 @@ public class Raster extends AbstractDetector {
         AbstractNode node;
         for (int i = 0; i < targets.size(); i++) {
             node = targets.get(i);
-            spikes[index][i] = node.getOut() > 0;
+            spikes[i][index] = node.getOut() > 0;
         }
         index++;
+        
     }
-
-    @Override
-    public Region getGraphic(Graph graph) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public boolean[][] getSpikes() {
+        return spikes;
     }
     
     @Override
@@ -62,9 +67,8 @@ public class Raster extends AbstractDetector {
         this.toConnect = toConnect;
     }
 
-    @Override
     public void createVisualizer() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        visualizer = new RasterVisualizer(app, this, false);
     }
     
     @Override

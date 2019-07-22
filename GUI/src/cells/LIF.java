@@ -29,6 +29,7 @@ public class LIF extends AbstractNode implements Connectable {
     
     private boolean toConnect = false;
     
+    //parameters
     protected double m;
     protected double V;
     protected double V_init;
@@ -37,6 +38,10 @@ public class LIF extends AbstractNode implements Connectable {
     protected double thr;
     protected double I_e;
     protected double noise;
+    
+    //recording parameters
+    protected boolean record_V;
+    protected boolean record_spikes;
 
     public LIF(double m, double V_init, double V_reset, double V_rest, double thr, double amplitude, double I_e, double noise) {
         super(amplitude, count);
@@ -50,6 +55,9 @@ public class LIF extends AbstractNode implements Connectable {
         this.thr = thr;
         this.I_e = I_e;
         this.noise = noise;
+        
+        record_V = true;
+        record_spikes = true;
         
         this.view = new Ellipse(50, 50);
     }

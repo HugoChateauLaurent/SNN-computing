@@ -31,15 +31,13 @@ public class Multimeter extends AbstractDetector {
     
     private static int count = 1;
 
-    private double[][] V;
+    private double[][] V; // [target][t]
     private int index;
-    private MainApp app;
 
     public Multimeter(List<AbstractNode> targets, MainApp app) {
-        super(targets, count);
+        super(targets, count, app);
         count++;
         this.view = new Rectangle(100, 100);
-        this.app = app;
     }
 
     public Multimeter(MainApp app) {
@@ -69,9 +67,7 @@ public class Multimeter extends AbstractDetector {
     }
 
     public void createVisualizer() {
-        visualizer = new MultimeterVisualizer(app, this, true);
-        HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
-        visualizers_hbox.getChildren().add(visualizer);
+        visualizer = new MultimeterVisualizer(app, this, false);
     }
     
     @Override

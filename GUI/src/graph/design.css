@@ -37,7 +37,7 @@
     
 .context-menu-title:disabled .label {
     -fx-background-color: black;
-    -fx-font-style: bold; 
+    -fx-font-weight: bold; 
     -fx-font-size: 17;
     -fx-text-fill: white;
     -fx-opacity: 1.0;
@@ -47,7 +47,7 @@
 
 .context-menu-title:disabled {
     -fx-background-color: black;
-    -fx-font-style: bold; 
+    -fx-font-weight: bold; 
     -fx-font-size: 17;
     -fx-text-fill: white;
     -fx-opacity: 1.0;
