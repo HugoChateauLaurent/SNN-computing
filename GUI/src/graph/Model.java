@@ -34,14 +34,20 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.Shape;
 import javafx.util.Pair;
 
 public class Model implements Serializable {
 
     private static final long serialVersionUID = 172247271876446110L;
-    
+
     private ObservableList<ICell> allCells;
+    private transient ObservableList<ICell> addedCells;
+    private transient ObservableList<ICell> removedCells;
+
     private ObservableList<IEdge> allEdges;
+    private transient ObservableList<IEdge> addedEdges;
+    private transient ObservableList<IEdge> removedEdges;
 
     private Graph graph;
 
@@ -56,7 +62,22 @@ public class Model implements Serializable {
 
     public void clear() {
         allCells = FXCollections.observableArrayList();
+        addedCells = FXCollections.observableArrayList();
+        removedCells = FXCollections.observableArrayList();
+
         allEdges = FXCollections.observableArrayList();
+        addedEdges = FXCollections.observableArrayList();
+        removedEdges = FXCollections.observableArrayList();
+    }
+
+    public void clearAddedLists() {
+        addedCells.clear();
+        addedEdges.clear();
+    }
+
+    public void endUpdate() {
+        // merge added & removed cells with all cells
+        merge();
     }
 
     public void updateRng() {
@@ -115,6 +136,14 @@ public class Model implements Serializable {
 
     }
 
+    public ObservableList<ICell> getAddedCells() {
+        return addedCells;
+    }
+
+    public ObservableList<ICell> getRemovedCells() {
+        return removedCells;
+    }
+
     public ObservableList<ICell> getAllCells() {
         return allCells;
     }
@@ -130,6 +159,14 @@ public class Model implements Serializable {
         return detectors;
     }
 
+    public ObservableList<IEdge> getAddedEdges() {
+        return addedEdges;
+    }
+
+    public ObservableList<IEdge> getRemovedEdges() {
+        return removedEdges;
+    }
+
     public ObservableList<IEdge> getAllEdges() {
         return allEdges;
     }
@@ -138,7 +175,7 @@ public class Model implements Serializable {
         if (cell == null) {
             throw new NullPointerException("Cannot add a null cell");
         }
-        allCells.add(cell);
+        addedCells.add(cell);
     }
 
     public void addSynapse(ICell pre, ICell post, double w, int d) {
@@ -155,7 +192,7 @@ public class Model implements Serializable {
         if (edge == null) {
             throw new NullPointerException("Cannot add a null edge");
         }
-        allEdges.add(edge);
+        addedEdges.add(edge);
     }
 
     public boolean tryToConnect(Connectable post) {
@@ -187,6 +224,7 @@ public class Model implements Serializable {
 
                     pre.updateToConnect(false);
                     post.updateToConnect(false);
+                    graph.endUpdate();
 
                     return true;
                 } else {
@@ -203,6 +241,7 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
+                graph.endUpdate();
                 return true;
                 
             } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
@@ -214,6 +253,7 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
+                graph.endUpdate();
                 return true;
                 
             } else {
@@ -275,6 +315,22 @@ public class Model implements Serializable {
         }
         return null;
 
+    }
+
+    public void merge() {
+        // cells
+        allCells.addAll(addedCells);
+        allCells.removeAll(removedCells);
+
+        addedCells.clear();
+        removedCells.clear();
+
+        // edges
+        allEdges.addAll(addedEdges);
+        allEdges.removeAll(removedEdges);
+
+        addedEdges.clear();
+        removedEdges.clear();
     }
 
     public void run() {
@@ -369,22 +425,20 @@ public class Model implements Serializable {
         this.addCell(raster);
         return raster;    }
 
-    public ICell createPoisson() {
+    public void createPoisson() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public ICell createSpikeTrain() {
+    public void createSpikeTrain() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public ICell createLIF() {
+    public void createLIF() {
         final Double[] params = LIF.askParameters();
-        ICell lif = null;
         if (params != null) {
-            lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+            final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
             this.addCell(lif);
         }
-        return lif;
     }
 
     public Multimeter createMultimeter() {

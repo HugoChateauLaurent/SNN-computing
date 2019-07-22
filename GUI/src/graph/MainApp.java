@@ -6,12 +6,12 @@ import cells.LIF;
 import cells.Multimeter;
 import cells.Raster;
 import edges.DetectorEdge;
-import edges.IEdge;
 import edges.Synapse;
 import java.awt.Canvas;
 import layout.RandomLayout;
 
 import javafx.application.Application;
+import javafx.beans.binding.DoubleBinding;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -28,6 +28,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import visualizer.AbstractVisualizer;
@@ -140,8 +145,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                ICell cell = graph.getModel().createLIF();
-                graph.addCell(cell);
+                graph.getModel().createLIF();
+                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -149,8 +154,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                ICell cell = graph.getModel().createSpikeTrain();
-                graph.addCell(cell);
+                graph.getModel().createSpikeTrain();
+                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -158,8 +163,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                ICell cell = graph.getModel().createPoisson();
-                graph.addCell(cell);
+                graph.getModel().createPoisson();
+                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -167,8 +172,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                ICell cell = graph.getModel().createMultimeter();
-                graph.addCell(cell);
+                graph.getModel().createMultimeter();
+                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -176,8 +181,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                ICell cell = graph.getModel().createRaster();
-                graph.addCell(cell);
+                graph.getModel().createRaster();
+                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -192,8 +197,6 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
-        
-        
         menuBar.getMenus().add(menu);
 
         menu = new Menu("Controls");
@@ -219,49 +222,34 @@ public class MainApp extends Application {
     }
     
     public void exampleElements() {
+        graph.beginUpdate();
         
         //create neurons with constant input
         LIF neuron = new LIF(1,0,0,0,1,1,0.3,0);
-        graph.getModel().addCell(neuron);
-        graph.addCell(neuron);
-        
         LIF neuron2 = new LIF(0.8,0,0,0,1,1,0.3,0);
+        graph.getModel().addCell(neuron);
         graph.getModel().addCell(neuron2);
-        graph.addCell(neuron2);
         
         //create detectors
         Raster raster = graph.getModel().createRaster();
         Multimeter multi = graph.getModel().createMultimeter();
         
         //connect detector and neurons
-        IEdge edge = new DetectorEdge(neuron,raster);
-        graph.getModel().addEdge(edge);
-        graph.addEdge(edge);
-        
-        edge = new DetectorEdge(neuron2,raster);
-        graph.getModel().addEdge(edge);
-        graph.addEdge(edge);
-        
-        edge = new DetectorEdge(neuron,multi);
-        graph.getModel().addEdge(edge);
-        graph.addEdge(edge);
-        
-        edge = new DetectorEdge(neuron2,multi);
-        graph.getModel().addEdge(edge);
-        graph.addEdge(edge);
+        graph.getModel().addEdge(new DetectorEdge(neuron,raster));
+        graph.getModel().addEdge(new DetectorEdge(neuron2,raster));
+        graph.getModel().addEdge(new DetectorEdge(neuron,multi));
+        graph.getModel().addEdge(new DetectorEdge(neuron2,multi));
         
         //open visualizers
         raster.displayVisualizer();
         multi.displayVisualizer();
+        
+        Group group = new Group();
+        group.getChildren().addAll(neuron.getGraphic(graph), neuron2.getGraphic(graph));
 
+        graph.endUpdate();
         
-        graph.addCell(raster);
-        graph.addCell(multi);
         graph.layout(new RandomLayout());
-        
-        
-        
-        
         
         
     }

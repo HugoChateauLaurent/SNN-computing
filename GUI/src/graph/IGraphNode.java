@@ -1,9 +1,9 @@
 package graph;
 
-import javafx.scene.layout.Region;
+import javafx.scene.shape.Shape;
 
 public interface IGraphNode {
 
-	public Region getGraphic(Graph graph);
+	public Shape getGraphic(Graph graph);
 
 }

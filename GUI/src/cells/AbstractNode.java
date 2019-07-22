@@ -64,8 +64,8 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
 
         if (this instanceof LIF) {
             ID_label.setText("LIF " + Integer.toString(ID));
-        } else if (this instanceof SpikeTrain) {
-            ID_label.setText("SpikeTrain " + Integer.toString(ID));
+        //} else if (this instanceof SpikeTrain) {
+        //    ID_label.setText("SpikeTrain " + Integer.toString(ID));
         } else {
             System.out.println("Unknown AbstractNode: cannot ID_label");
         }

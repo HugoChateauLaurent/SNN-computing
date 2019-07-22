@@ -20,6 +20,7 @@ import javafx.scene.Group;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -49,5 +50,14 @@ public class Synapse extends AbstractEdge {
         this.out_pre[this.index] = this.pre.getOut(); // store current output of pre
         this.index = (this.index + 1) % this.out_pre.length;
         this.post.setI(this.post.getI() + this.w * this.out_pre[index]); // add w*pre_{t-d} to post 
+    }
+    
+    @Override
+    protected Color getColor() {
+        if (w < 0) {
+            return new Color(30f/255,144f/255,255f/255,1.0); // Blue
+        } else {
+            return new Color(205f/255,92f/255,92f/255,0.8); // Red
+        }
     }
 }

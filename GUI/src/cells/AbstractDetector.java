@@ -37,11 +37,6 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     
     public abstract void init(int steps);
     
-    @Override
-    public void doubleClick() {
-        createVisualizer();
-    }
-    
     public void setVisualizer(AbstractVisualizer visualizer) {
         this.visualizer = visualizer;
     }

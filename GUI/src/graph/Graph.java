@@ -1,7 +1,9 @@
 package graph;
 
+import cells.AbstractCell;
 import edges.IEdge;
 import cells.ICell;
+import edges.AbstractEdge;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,17 +12,19 @@ import layout.Layout;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Region;
+import javafx.scene.shape.Shape;
 
 public class Graph {
 
     private final MainApp app;
     private final Model model;
     private final PannableCanvas pannableCanvas;
-    private final Map<IGraphNode, Region> graphics;
+    private final Map<IGraphNode, Shape> graphics;
     private final NodeGestures nodeGestures;
     private final ViewportGestures viewportGestures;
     private final BooleanProperty useNodeGestures;
@@ -34,6 +38,7 @@ public class Graph {
         this.app = app;
         this.model = model;
         this.model.setGraph(this);
+        
 
         nodeGestures = new NodeGestures(this);
         useNodeGestures = new SimpleBooleanProperty(true);
@@ -77,13 +82,9 @@ public class Graph {
         });
 
         graphics = new HashMap<>();
-        
-        for (IEdge edge : getModel().getAllEdges()) {
-            addEdge(edge);
-        }
-        for (ICell cell : getModel().getAllCells()) {
-            addCell(cell);
-        }
+
+        addEdges(getModel().getAllEdges());
+        addCells(getModel().getAllCells());        
     }
 
     public MainApp getApp() {
@@ -97,8 +98,12 @@ public class Graph {
     public PannableCanvas getCanvas() {
         return pannableCanvas;
     }
-    
-    /*public void endUpdate() {
+
+    public void beginUpdate() {
+        pannableCanvas.getChildren().clear();
+    }
+
+    public void endUpdate() {
         // add components to graph pane
         addEdges(model.getAddedEdges());
         addCells(model.getAddedCells());
@@ -109,33 +114,32 @@ public class Graph {
 
         // clean up the model
         model.endUpdate();
+    }
+
+    private void addEdges(List<IEdge> edges) {
+        edges.stream().map(edge -> getGraphic(edge)).forEach(edgeGraphic -> 
+                pannableCanvas.getChildren().add(edgeGraphic));
         
-        System.out.println("__________");
-        System.out.println(pannableCanvas.getChildren().size());
-        for (Object child: pannableCanvas.getChildren()) {
-            System.out.println(child);
-        }
-    }*/
-
-    public void addEdge(IEdge edge) {
-        pannableCanvas.getChildren().add(edge.getGraphic(this));
+        cellsToFront();
     }
 
-    public void addCell(ICell cell) {
-        pannableCanvas.getChildren().add(cell.getGraphic(this));
-        if (useNodeGestures.get()) {
-            nodeGestures.makeDraggable(cell.getGraphic(this));
-        }
+    private void addCells(List<ICell> cells) {
+        cells.stream().map(cell -> getGraphic(cell)).forEach(cellGraphic -> {
+            pannableCanvas.getChildren().add(cellGraphic);
+            if (useNodeGestures.get()) {
+                nodeGestures.makeDraggable(cellGraphic);
+            }
+        });
     }
 
-    public Region getGraphic(IGraphNode node) {
-        if (!graphics.containsKey(node)) {
+    public Shape getGraphic(IGraphNode node) {
+        if (!graphics.containsKey(node)) {            
             graphics.put(node, createGraphic(node));
         }
         return graphics.get(node);
     }
 
-    public Region createGraphic(IGraphNode node) {
+    public Shape createGraphic(IGraphNode node) {
         return node.getGraphic(this);
     }
 
@@ -161,5 +165,13 @@ public class Graph {
 
     public BooleanProperty getUseViewportGestures() {
         return useViewportGestures;
+    }
+
+    private void cellsToFront() {
+        for (Map.Entry<IGraphNode, Shape> graphic : graphics.entrySet()) {
+            if (graphic.getKey() instanceof AbstractCell) {
+                graphic.getValue().toFront();
+            }
+        }
     }
 }

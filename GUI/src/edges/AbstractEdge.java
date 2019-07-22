@@ -6,17 +6,24 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Group;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Shape;
 
 public abstract class AbstractEdge implements IEdge {
 
     private final ICell source;
     private final ICell target;
+    private Shape view;
 
     public AbstractEdge(ICell source, ICell target) {
         this.source = source;
         this.target = target;
+        this.view = null;
 
         if (source == null) {
             throw new NullPointerException("Source cannot be null");
@@ -43,60 +50,42 @@ public abstract class AbstractEdge implements IEdge {
     /*
         View
      */
-    
     @Override
-    public EdgeGraphic getGraphic(Graph graph) {
-        return new EdgeGraphic(graph, this);
+    public Shape getGraphic(Graph graph) {
+        Line line = new Line();
+        view = line;
+
+        final DoubleBinding sourceX = source.getXAnchor(graph);
+        final DoubleBinding sourceY = source.getYAnchor(graph);
+        final DoubleBinding targetX = target.getXAnchor(graph);
+        final DoubleBinding targetY = target.getYAnchor(graph);
+
+        line.startXProperty().bind(sourceX);
+        line.startYProperty().bind(sourceY);
+        line.endXProperty().bind(targetX);
+        line.endYProperty().bind(targetY);
+        
+        line.startXProperty().addListener(o -> updateLineGradient());
+        line.startYProperty().addListener(o -> updateLineGradient());
+        line.endXProperty().addListener(o -> updateLineGradient());
+        line.endYProperty().addListener(o -> updateLineGradient());
+        
+        line.setStrokeWidth(5);
+        
+        updateLineGradient();
+                
+        return line;
     }
-
-    public static class EdgeGraphic extends Pane {
-
-        private final Group group;
-        private final Line line;
-
-        public EdgeGraphic(Graph graph, AbstractEdge edge) {
-            group = new Group();
-            line = new Line();
-
-            line.setStrokeWidth(3);
-
-            final DoubleBinding sourceX = edge.getSource().getXAnchor(graph);
-            final DoubleBinding sourceY = edge.getSource().getYAnchor(graph);
-            final DoubleBinding targetX = edge.getTarget().getXAnchor(graph);
-            final DoubleBinding targetY = edge.getTarget().getYAnchor(graph);
-
-            line.startXProperty().bind(sourceX);
-            line.startYProperty().bind(sourceY);
-
-            line.endXProperty().bind(targetX);
-            line.endYProperty().bind(targetY);
-            line.toBack();
-            group.getChildren().add(line);
-
-            Ellipse endpoint = new Ellipse(25, 25);
-
-            final DoubleBinding angle = Bindings.createDoubleBinding(() -> Math.atan2(sourceY.get() - targetY.get(), sourceX.get() - targetX.get()), sourceX, sourceY, targetX, targetY);
-
-            final DoubleBinding vectorX = Bindings.createDoubleBinding(() -> Math.cos(angle.get()), angle).multiply(graph.getGraphic(edge.getTarget()).widthProperty());
-            final DoubleBinding vectorY = Bindings.createDoubleBinding(() -> Math.sin(angle.get()), angle).multiply(graph.getGraphic(edge.getTarget()).heightProperty());
-
-            endpoint.centerXProperty().bind(targetX.add(vectorX));
-            endpoint.centerYProperty().bind(targetY.add(vectorY));
-            group.getChildren().add(endpoint);
-
-            getChildren().add(group);
-            group.toBack();
-
-        }
-
-        public Group getGroup() {
-            return group;
-        }
-
-        public Line getLine() {
-            return line;
-        }
-
+    
+    private void updateLineGradient() {
+        Line line = (Line) view;
+        Stop[] stops = new Stop[] {new Stop(0.5, new Color(0,0,0,1.0)), new Stop(1, getColor())};
+        LinearGradient lg = new LinearGradient(line.startXProperty().get(), line.startYProperty().get(), line.endXProperty().get(), line.endYProperty().get(), false, CycleMethod.NO_CYCLE, stops);
+        line.setStroke(lg);
+    }
+    
+    protected Color getColor() {
+        return Color.BLACK;
     }
 
 }

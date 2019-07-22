@@ -19,7 +19,7 @@ import javafx.scene.shape.Shape;
 public abstract class AbstractCell implements ICell {
     
     protected int ID;
-    
+
     protected boolean toConnect = false;
     protected Shape view = null;
     final DragContext dragContext = new DragContext();
@@ -35,21 +35,19 @@ public abstract class AbstractCell implements ICell {
     }
 
     @Override
-    public Region getGraphic(Graph graph) {
+    public Shape getGraphic(Graph graph) {
         this.updateColor();
         view.setStroke(Color.BLACK);
-        view.setStrokeWidth(3);
-        final Pane pane = new Pane(view);
-        pane.setPrefSize(50, 50);
+        view.setStrokeWidth(5);
 
         if (view instanceof Ellipse) {
             Ellipse ellipse = (Ellipse) view;
-            ellipse.radiusXProperty().bind(pane.prefWidthProperty());
-            ellipse.radiusYProperty().bind(pane.prefHeightProperty());
+            ellipse.radiusXProperty().set(30);
+            ellipse.radiusYProperty().set(30);
         } else if (view instanceof Rectangle) {
             Rectangle rectangle = (Rectangle) view;
-            rectangle.widthProperty().bind(pane.prefWidthProperty());
-            rectangle.heightProperty().bind(pane.prefHeightProperty());
+            rectangle.widthProperty().set(35);
+            rectangle.heightProperty().set(35);
         }
 
         Connectable this_connectable = (Connectable) this;
@@ -63,54 +61,8 @@ public abstract class AbstractCell implements ICell {
                 }
             }
         });
-        view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == MouseButton.PRIMARY && mouseEvent.getClickCount() == 2) {
-                    System.out.println("Connection mode: " + String.valueOf(!toConnect));
-                    updateToConnect(!toConnect);
-                    graph.getModel().tryToConnect(this_connectable);
-                }
-            }
-        });
-
-        /*view.addEventHandler(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-                    
-                    double offsetX = mouseEvent.getScreenX() + dragContext.x;
-                    double offsetY = mouseEvent.getScreenY() + dragContext.y;
-                    
-                    // adjust the offset in case we are zoomed
-                    final double scale = graph.getScale();
-
-                    offsetX /= scale;
-                    offsetY /= scale;
-                            
-                    view.relocate(offsetX, offsetY);
-                    graph.getApp().updateHierarchy();
-                    
-                }
-            }
-        });
         
-        view.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
-
-            @Override
-            public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == MouseButton.PRIMARY) {
-                    final double scale = graph.getScale();
-                    dragContext.x = view.getBoundsInParent().getMinX() * scale - mouseEvent.getScreenX();
-                    dragContext.y = view.getBoundsInParent().getMinY() * scale - mouseEvent.getScreenY();
-                }
-            }
-        });*/
-        
-    
-
-        return pane;
+        return view;
     }
 
     public static class DragContext {
@@ -124,10 +76,6 @@ public abstract class AbstractCell implements ICell {
         } else {
             view.setFill(Color.WHITE);
         }
-    }
-
-    public void doubleClick() {
-        System.out.println("TODO: update parameters for neuron");
     }
 
     public boolean getToConnect() {
