@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="GUI.jar" size="63785" download="eager" />
+    <jar href="GUI.jar" size="63872" download="eager" />
   </resources>
   <jfx:javafx-desc  width="800" height="600" main-class="graph.MainApp"  name="GUI" />
   <update check="always"/>

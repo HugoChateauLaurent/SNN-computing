@@ -31,7 +31,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -250,6 +252,23 @@ public class MainApp extends Application {
         graph.endUpdate();
         
         graph.layout(new RandomLayout());
+        
+        Ellipse ellipse_blue = new Ellipse(30,30);
+        ellipse_blue.setStyle("-fx-fill: radial-gradient(center 100% 50%, radius 100%, blue, white 30%);"
+                + "-fx-stroke: radial-gradient(center 100% 50%, radius 100%, blue, black 30%);");
+        ellipse_blue.strokeWidthProperty().set(5);
+        
+        Ellipse ellipse_red = new Ellipse(30,30);
+        ellipse_red.setStyle("-fx-fill: radial-gradient(center 0% 50%, radius 100%, red, white 30%);"
+                + "-fx-stroke: radial-gradient(center 0% 50%, radius 100%, red, black 30%);");
+        ellipse_red.strokeWidthProperty().set(5);
+        
+        ellipse_blue.relocate(0, -20);
+        ellipse_red.relocate(100, -20);
+        
+        
+        
+        graph.getCanvas().getChildren().addAll(ellipse_blue, ellipse_red);
         
         
     }

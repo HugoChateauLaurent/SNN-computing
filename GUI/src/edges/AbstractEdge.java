@@ -79,7 +79,7 @@ public abstract class AbstractEdge implements IEdge {
     
     private void updateLineGradient() {
         Line line = (Line) view;
-        Stop[] stops = new Stop[] {new Stop(0.5, new Color(0,0,0,1.0)), new Stop(1, getColor())};
+        Stop[] stops = new Stop[] {new Stop(0.3, new Color(0,0,0,1.0)), new Stop(1, getColor())};
         LinearGradient lg = new LinearGradient(line.startXProperty().get(), line.startYProperty().get(), line.endXProperty().get(), line.endYProperty().get(), false, CycleMethod.NO_CYCLE, stops);
         line.setStroke(lg);
     }
