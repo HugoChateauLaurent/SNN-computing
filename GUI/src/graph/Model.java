@@ -47,13 +47,9 @@ public class Model implements Serializable {
 
     private ArrayList<ICell> allCellsSerialization;
     private transient ObservableList<ICell> allCells;
-    private transient ObservableList<ICell> addedCells;
-    private transient ObservableList<ICell> removedCells;
 
     private ArrayList<IEdge> allEdgesSerialization;
     private transient ObservableList<IEdge> allEdges;
-    private transient ObservableList<IEdge> addedEdges;
-    private transient ObservableList<IEdge> removedEdges;
 
     private transient Graph graph;
 
@@ -65,25 +61,14 @@ public class Model implements Serializable {
     public void setGraph(Graph graph) {
         this.graph = graph;
     }
+    
+    public Graph getGraph() {
+        return graph;
+    }
 
     public void clear() {
         allCells = FXCollections.observableArrayList();
-        addedCells = FXCollections.observableArrayList();
-        removedCells = FXCollections.observableArrayList();
-
         allEdges = FXCollections.observableArrayList();
-        addedEdges = FXCollections.observableArrayList();
-        removedEdges = FXCollections.observableArrayList();
-    }
-
-    public void clearAddedLists() {
-        addedCells.clear();
-        addedEdges.clear();
-    }
-
-    public void endUpdate() {
-        // merge added & removed cells with all cells
-        merge();
     }
 
     public void updateRng() {
@@ -142,14 +127,6 @@ public class Model implements Serializable {
 
     }
 
-    public ObservableList<ICell> getAddedCells() {
-        return addedCells;
-    }
-
-    public ObservableList<ICell> getRemovedCells() {
-        return removedCells;
-    }
-
     public ObservableList<ICell> getAllCells() {
         return allCells;
     }
@@ -165,40 +142,26 @@ public class Model implements Serializable {
         return detectors;
     }
 
-    public ObservableList<IEdge> getAddedEdges() {
-        return addedEdges;
-    }
-
-    public ObservableList<IEdge> getRemovedEdges() {
-        return removedEdges;
-    }
-
     public ObservableList<IEdge> getAllEdges() {
         return allEdges;
     }
 
     public void addCell(ICell cell) {
-        if (cell == null) {
-            throw new NullPointerException("Cannot add a null cell");
-        }
-        addedCells.add(cell);
+        allCells.add(cell);
     }
 
     public void addSynapse(ICell pre, ICell post, double w, int d) {
         final Synapse connection = new Synapse((AbstractNode) pre, (AbstractNode) post, w, d);
-        addEdge((IEdge) connection);
+        graph.addEdge((IEdge) connection, true);
     }
     
     public void addDetectorEdge(AbstractNode target, AbstractDetector detector) {
         final DetectorEdge connection = new DetectorEdge((AbstractNode) target, detector);
-        addEdge((IEdge) connection);
+        graph.addEdge((IEdge) connection, true);
     }
 
     public void addEdge(IEdge edge) {
-        if (edge == null) {
-            throw new NullPointerException("Cannot add a null edge");
-        }
-        addedEdges.add(edge);
+        allEdges.add(edge);
     }
 
     public boolean tryToConnect(Connectable post) {
@@ -230,7 +193,6 @@ public class Model implements Serializable {
 
                     pre.updateToConnect(false);
                     post.updateToConnect(false);
-                    graph.endUpdate();
 
                     return true;
                 } else {
@@ -247,7 +209,6 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
-                graph.endUpdate();
                 return true;
                 
             } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
@@ -259,7 +220,6 @@ public class Model implements Serializable {
                 
                 pre.updateToConnect(false);
                 post.updateToConnect(false);
-                graph.endUpdate();
                 return true;
                 
             } else {
@@ -321,22 +281,6 @@ public class Model implements Serializable {
         }
         return null;
 
-    }
-
-    public void merge() {
-        // cells
-        allCells.addAll(addedCells);
-        allCells.removeAll(removedCells);
-
-        addedCells.clear();
-        removedCells.clear();
-
-        // edges
-        allEdges.addAll(addedEdges);
-        allEdges.removeAll(removedEdges);
-
-        addedEdges.clear();
-        removedEdges.clear();
     }
 
     public void run() {
@@ -426,9 +370,9 @@ public class Model implements Serializable {
     }
 
     public Raster createRaster() {
-        final Raster raster = new Raster(graph.getApp());
+        final Raster raster = new Raster(this);
         raster.createVisualizer();
-        this.addCell(raster);
+        graph.addCell(raster);
         return raster;    }
 
     public void createPoisson() {
@@ -442,15 +386,15 @@ public class Model implements Serializable {
     public void createLIF() {
         final Double[] params = LIF.askParameters();
         if (params != null) {
-            final ICell lif = new LIF(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
-            this.addCell(lif);
+            final ICell lif = new LIF(this, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+            graph.addCell(lif);
         }
     }
 
     public Multimeter createMultimeter() {
-        final Multimeter multimeter = new Multimeter(graph.getApp());
+        final Multimeter multimeter = new Multimeter(this);
         multimeter.createVisualizer();
-        this.addCell(multimeter);
+        graph.addCell(multimeter);
         return multimeter;
     }
 
@@ -465,11 +409,6 @@ public class Model implements Serializable {
         aInputStream.defaultReadObject();
         allCells = FXCollections.observableArrayList(allCellsSerialization);
         allEdges = FXCollections.observableArrayList(allEdgesSerialization);
-
-        addedCells = FXCollections.observableArrayList();
-        removedCells = FXCollections.observableArrayList();
-        addedEdges = FXCollections.observableArrayList();
-        removedEdges = FXCollections.observableArrayList();
     
     }
 
@@ -480,16 +419,27 @@ public class Model implements Serializable {
             aOutputStream.defaultWriteObject();
     }
     
-    public void setDetectorsApp(MainApp app) {
-        for (AbstractDetector detector : getAllDetectors()) {
-            detector.setApp(app);
-        }
-    }
-    
     public void createVisualizers() {
         for (AbstractDetector detector : getAllDetectors()) {
             detector.createVisualizer();
         }
     }
 
+    void removeCell(ICell cell) {
+        allCells.remove(cell);
+    }
+
+    void removeEdge(IEdge edge) {
+        allEdges.remove(edge);
+    }
+    
+    public void removeConnectedEdges(ICell cell) {
+        ArrayList<IEdge> toRemove = new ArrayList();
+        for (IEdge edge : allEdges) {
+            if (edge.getSource() == cell || edge.getTarget() == cell) {
+                toRemove.add(edge);
+            }
+        }
+        graph.removeEdges(toRemove);
+    }
 }

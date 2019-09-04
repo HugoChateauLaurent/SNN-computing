@@ -1,6 +1,7 @@
 package cells;
 
 import graph.Graph;
+import graph.Model;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -43,8 +44,8 @@ public class LIF extends AbstractNode implements Connectable {
     protected boolean record_V;
     protected boolean record_spikes;
 
-    public LIF(double m, double V_init, double V_reset, double V_rest, double thr, double amplitude, double I_e, double noise) {
-        super(amplitude, count);
+    public LIF(Model model, double m, double V_init, double V_reset, double V_rest, double thr, double amplitude, double I_e, double noise) {
+        super(amplitude, count, model);
         count++;
         
         this.m = m;

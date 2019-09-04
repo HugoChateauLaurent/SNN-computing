@@ -197,7 +197,6 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().createLIF();
-                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -207,7 +206,6 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().createSpikeTrain();
-                graph.endUpdate();
             }
         });
         item.setDisable(true);
@@ -218,7 +216,6 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().createPoisson();
-                graph.endUpdate();
             }
         });
         item.setDisable(true);
@@ -236,7 +233,6 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().createMultimeter();
-                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -246,7 +242,6 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 graph.getModel().createRaster();
-                graph.endUpdate();
             }
         });
         menu.getItems().add(item);
@@ -289,8 +284,8 @@ public class MainApp extends Application {
         graph.beginUpdate();
         
         //create neurons with constant input
-        LIF neuron = new LIF(1,0,0,0,1,1,0.3,0);
-        LIF neuron2 = new LIF(0.8,0,0,0,1,1,0.3,0);
+        LIF neuron = new LIF(graph.getModel(), 1,0,0,0,1,1,0.3,0);
+        LIF neuron2 = new LIF(graph.getModel(), 0.8,0,0,0,1,1,0.3,0);
         graph.getModel().addCell(neuron);
         graph.getModel().addCell(neuron2);
         
@@ -311,7 +306,6 @@ public class MainApp extends Application {
         Group group = new Group();
         group.getChildren().addAll(neuron.getGraphic(graph), neuron2.getGraphic(graph));
 
-        graph.endUpdate();
         
         graph.layout(new RandomLayout());
         
@@ -426,11 +420,7 @@ public class MainApp extends Application {
         Model model = serialization.getModel();
         graph = new Graph(this, model);
         model.setGraph(graph);
-        model.setDetectorsApp(this);
-        model.createVisualizers();
-        
-        graph.endUpdate();
-        
+        model.createVisualizers();        
         
         PannableCanvas graph_workspace = graph.getCanvas();
         

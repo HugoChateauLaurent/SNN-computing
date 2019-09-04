@@ -9,6 +9,7 @@ import cells.LIF;
 import cells.AbstractNode;
 import graph.Graph;
 import graph.MainApp;
+import graph.Model;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -31,13 +32,13 @@ public class Raster extends AbstractDetector {
     private boolean[][] spikes; // [target][t]
     private int index;
 
-    public Raster(List<AbstractNode> targets, MainApp app) {
-        super(targets, count, app);
+    public Raster(Model model, List<AbstractNode> targets) {
+        super(targets, count, model);
         count++;
     }
 
-    public Raster(MainApp app) {
-        this(new LinkedList(), app);
+    public Raster(Model model) {
+        this(model, new LinkedList());
     }
 
     public void init(int steps) {
@@ -70,7 +71,7 @@ public class Raster extends AbstractDetector {
     }
 
     public void createVisualizer() {
-        visualizer = new RasterVisualizer(app, this, false);
+        visualizer = new RasterVisualizer(model.getGraph().getApp(), this, false);
     }
     
     public static int getCount() {

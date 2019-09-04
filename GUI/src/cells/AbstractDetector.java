@@ -6,6 +6,7 @@ import cells.AbstractNode;
 import graph.Graph;
 import graph.IGraphNode;
 import graph.MainApp;
+import graph.Model;
 import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,13 +22,12 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     List<AbstractNode> targets;    
     protected boolean toConnect;
     protected transient AbstractVisualizer visualizer;
-    protected transient MainApp app;
 
     
-    public AbstractDetector(List<AbstractNode> targets, int ID, MainApp app) {
+    public AbstractDetector(List<AbstractNode> targets, int ID, Model model) {
         this.targets = targets;
         this.ID = ID;
-        this.app = app;
+        this.model = model;
         createView();
     }
     
@@ -39,10 +39,6 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     
     public List<AbstractNode> getTargets() {
         return targets;
-    }
-    
-    public void setApp(MainApp app) {
-        this.app = app;
     }
     
     public abstract void createVisualizer();
@@ -128,7 +124,7 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     }
     
     public void displayVisualizer() {
-        HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
+        HBox visualizers_hbox = (HBox) model.getGraph().getApp().getVisualizers().getContent();
         if (visualizers_hbox.getChildren().contains(visualizer)) {
             visualizers_hbox.getChildren().remove(visualizer);
         } else {

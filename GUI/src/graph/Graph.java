@@ -3,6 +3,9 @@ package graph;
 import cells.AbstractCell;
 import edges.IEdge;
 import cells.ICell;
+import cells.LIF;
+import cells.Multimeter;
+import cells.Raster;
 import edges.AbstractEdge;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -84,8 +87,8 @@ public class Graph implements Serializable {
 
         graphics = new HashMap<>();
 
-        addEdges(getModel().getAllEdges());
-        addCells(getModel().getAllCells());        
+        addEdges(model.getAllEdges());
+        addCells(model.getAllCells());        
     }
 
     public MainApp getApp() {
@@ -104,33 +107,36 @@ public class Graph implements Serializable {
         pannableCanvas.getChildren().clear();
     }
 
-    public void endUpdate() {
-        // add components to graph pane
-        addEdges(model.getAddedEdges());
-        addCells(model.getAddedCells());
-
-        // remove components to graph pane
-        model.getRemovedCells().stream().map(cell -> getGraphic(cell)).forEach(cellGraphic -> pannableCanvas.getChildren().remove(cellGraphic));
-        model.getRemovedEdges().stream().map(edge -> getGraphic(edge)).forEach(edgeGraphic -> pannableCanvas.getChildren().remove(edgeGraphic));
-
-        // clean up the model
-        model.endUpdate();
-    }
-
     private void addEdges(List<IEdge> edges) {
-        edges.stream().map(edge -> getGraphic(edge)).forEach(edgeGraphic -> 
-                pannableCanvas.getChildren().add(edgeGraphic));
-        
+        for (IEdge edge : edges) {
+            addEdge(edge, false);
+        }
         cellsToFront();
+    }
+    
+    public void addEdge(IEdge edge, boolean cellsToFront) {
+        Shape graphic = getGraphic(edge);
+        pannableCanvas.getChildren().add(graphic);
+        model.addEdge(edge);
+        
+        if (cellsToFront) {
+            cellsToFront();
+        }
     }
 
     private void addCells(List<ICell> cells) {
-        cells.stream().map(cell -> getGraphic(cell)).forEach(cellGraphic -> {
-            pannableCanvas.getChildren().add(cellGraphic);
-            if (useNodeGestures.get()) {
-                nodeGestures.makeDraggable(cellGraphic);
-            }
-        });
+        for (ICell cell : cells) {
+            addCell(cell);
+        }
+    }
+    
+    public void addCell(ICell cell) {
+        Shape graphic = getGraphic(cell);
+        pannableCanvas.getChildren().add(graphic);
+        if (useNodeGestures.get()) {
+            nodeGestures.makeDraggable(graphic);
+        }
+        model.addCell(cell);
     }
 
     public Shape getGraphic(IGraphNode node) {
@@ -173,6 +179,33 @@ public class Graph implements Serializable {
             if (graphic.getKey() instanceof AbstractCell) {
                 graphic.getValue().toFront();
             }
+        }
+    }
+    
+    public void removeCell(ICell cell) {
+        Shape cellGraphic = getGraphic(cell);
+        pannableCanvas.getChildren().remove(cellGraphic);
+        model.removeConnectedEdges(cell);
+        model.removeCell(cell);
+        
+        if (cell instanceof LIF) {
+            LIF.setCount(LIF.getCount()-1);
+        } else if (cell instanceof Multimeter) {
+            Multimeter.setCount(Multimeter.getCount()-1);
+        } else if (cell instanceof Raster) {
+            Raster.setCount(Raster.getCount()-1);
+        } 
+    }
+    
+    public void removeEdge(IEdge edge) {
+        Shape edgeGraphic = getGraphic(edge);
+        pannableCanvas.getChildren().remove(edgeGraphic);
+        model.removeEdge(edge);
+    }
+    
+    public void removeEdges(List<IEdge> edges) {
+        for (IEdge edge : edges) {
+            removeEdge(edge);
         }
     }
 }

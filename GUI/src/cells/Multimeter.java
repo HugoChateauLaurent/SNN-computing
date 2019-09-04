@@ -9,6 +9,7 @@ import cells.LIF;
 import cells.AbstractNode;
 import graph.Graph;
 import graph.MainApp;
+import graph.Model;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -37,22 +38,18 @@ public class Multimeter extends AbstractDetector {
     private double[][] V; // [target][t]
     private int index;
 
-    public Multimeter(List<AbstractNode> targets, MainApp app) {
-        super(targets, count, app);
+    public Multimeter(Model model, List<AbstractNode> targets) {
+        super(targets, count, model);
         count++;
     }
 
-    public Multimeter(MainApp app) {
-        this(new LinkedList(), app);
+    public Multimeter(Model model) {
+        this(model, new LinkedList());
     }
 
     public void init(int steps) {
         this.V = new double[targets.size()][steps];
         this.index = 0;
-    }
-    
-    public MainApp getApp() {
-        return app;
     }
 
     public double[][] getV() {
@@ -69,7 +66,7 @@ public class Multimeter extends AbstractDetector {
     }
 
     public void createVisualizer() {
-        visualizer = new MultimeterVisualizer(app, this, false);
+        visualizer = new MultimeterVisualizer(model.getGraph().getApp(), this, false);
     }
     
     public static int getCount() {

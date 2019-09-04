@@ -88,5 +88,9 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     protected Color getColor() {
         return Color.BLACK;
     }
+    
+    public void delete() {
+        System.out.println("Delete edge not implemented");
+    }
 
 }

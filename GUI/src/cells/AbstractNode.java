@@ -6,6 +6,7 @@
 package cells;
 
 import graph.Graph;
+import graph.Model;
 import java.io.Serializable;
 import java.util.Random;
 import javafx.event.ActionEvent;
@@ -26,10 +27,11 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
     protected double amplitude;
     protected Random rng;
     
-    public AbstractNode(double amplitude, int ID) {
+    public AbstractNode(double amplitude, int ID, Model model) {
         this.amplitude = amplitude;
         this.rng = new Random();
         this.ID = ID;
+        this.model = model;
         createView();
     }
     

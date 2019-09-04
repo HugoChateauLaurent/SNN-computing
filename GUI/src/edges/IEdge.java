@@ -10,5 +10,7 @@ public interface IEdge extends IGraphNode {
     public ICell getTarget();
 
     public void step();
+    
+    public void delete();
 
 }

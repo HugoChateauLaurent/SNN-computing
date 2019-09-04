@@ -1,6 +1,7 @@
 package cells;
 
 import graph.Graph;
+import graph.Model;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -32,6 +33,16 @@ public abstract class AbstractCell implements ICell, Serializable {
     protected transient Shape view = null;
     final DragContext dragContext = new DragContext();
     
+    protected Model model;
+    
+    public void setModel(Model model) {
+        this.model = model;
+    }
+    
+    public Model getModel() {
+        return model;
+    }
+     
     public Shape getView() {
         return view;
     }
@@ -115,7 +126,7 @@ public abstract class AbstractCell implements ICell, Serializable {
     }
     
     public void delete() {
-        System.out.println("Delete not implemented");
+        model.getGraph().removeCell(this);
     }
     
     

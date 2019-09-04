@@ -40,5 +40,7 @@ public interface ICell extends IGraphNode {
     default void init() {
         // some cells parameters need to be initialized at the beginning of a simulation (e.g. LIF voltage)
     }
+    
+    public void delete();
 
 }
