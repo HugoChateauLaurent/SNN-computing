@@ -6,6 +6,7 @@
 package cells;
 
 import graph.Graph;
+import java.io.Serializable;
 import java.util.Random;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -29,6 +30,7 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         this.amplitude = amplitude;
         this.rng = new Random();
         this.ID = ID;
+        createView();
     }
     
     public void update_rng(Random rng) {
@@ -52,12 +54,18 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
     }
     
     @Override
-    public ContextMenu createContextMenu(MouseEvent event, Graph graph){
+    public ContextMenu createContextMenu(Graph graph){
         
         Connectable this_connectable = (Connectable) this;
         
         final ContextMenu contextMenu = new ContextMenu();
-        
+        /*contextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) {
+                System.out.println("hide");
+                contextMenu.hide();
+            }
+                
+        });*/      
         MenuItem ID_label = new MenuItem("");
         ID_label.setDisable(true);
         ID_label.getStyleClass().add("context-menu-title");
@@ -112,7 +120,6 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
                 graph.getModel().beginUpdate();
                 lif.getGraphic(graph).toFront();
                 graph.endUpdate();
-
             }
         });
         
@@ -123,7 +130,6 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
                 graph.getModel().beginUpdate();
                 lif.getGraphic(graph).toBack();
                 graph.endUpdate();
-
             }
         });*/
         

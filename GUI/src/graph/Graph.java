@@ -4,6 +4,7 @@ import cells.AbstractCell;
 import edges.IEdge;
 import cells.ICell;
 import edges.AbstractEdge;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,16 +20,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Shape;
 
-public class Graph {
+public class Graph implements Serializable {
 
-    private final MainApp app;
+    private final transient MainApp app;
     private final Model model;
-    private final PannableCanvas pannableCanvas;
-    private final Map<IGraphNode, Shape> graphics;
-    private final NodeGestures nodeGestures;
-    private final ViewportGestures viewportGestures;
-    private final BooleanProperty useNodeGestures;
-    private final BooleanProperty useViewportGestures;
+    private final transient PannableCanvas pannableCanvas;
+    private final transient Map<IGraphNode, Shape> graphics;
+    private final transient NodeGestures nodeGestures;
+    private final transient ViewportGestures viewportGestures;
+    private final transient BooleanProperty useNodeGestures;
+    private final transient BooleanProperty useViewportGestures;
 
     public Graph(MainApp app) {
         this(app, new Model());

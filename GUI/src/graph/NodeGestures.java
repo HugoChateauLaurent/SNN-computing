@@ -1,10 +1,11 @@
 package graph;
 
+import java.io.Serializable;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 
-public class NodeGestures {
+public class NodeGestures implements Serializable {
 
     final DragContext dragContext = new DragContext();
     final Graph graph;
@@ -67,7 +68,7 @@ public class NodeGestures {
         }
     };
 
-    public static class DragContext {
+    public static class DragContext implements Serializable {
 
         double x;
         double y;

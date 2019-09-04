@@ -1,5 +1,6 @@
 package graph;
 
+import java.io.Serializable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -9,7 +10,7 @@ import javafx.scene.input.ScrollEvent;
 /**
  * Listeners for making the scene's viewport draggable and zoomable
  */
-public class ViewportGestures {
+public class ViewportGestures implements Serializable {
 
     private final DoubleProperty zoomSpeedProperty = new SimpleDoubleProperty(1.2d);
     private final DoubleProperty maxScaleProperty = new SimpleDoubleProperty(10.0d);
@@ -40,7 +41,7 @@ public class ViewportGestures {
         maxScaleProperty.set(maxScale);
     }
 
-    private final EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
+    private transient final EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
 
         @Override
         public void handle(MouseEvent event) {
@@ -60,7 +61,7 @@ public class ViewportGestures {
 
     };
 
-    private final EventHandler<MouseEvent> onMouseDraggedEventHandler = new EventHandler<MouseEvent>() {
+    private final transient EventHandler<MouseEvent> onMouseDraggedEventHandler = new EventHandler<MouseEvent>() {
         @Override
         public void handle(MouseEvent event) {
 
@@ -79,7 +80,7 @@ public class ViewportGestures {
     /**
      * Mouse wheel handler: zoom to pivot point
      */
-    private final EventHandler<ScrollEvent> onScrollEventHandler = new EventHandler<ScrollEvent>() {
+    private final transient EventHandler<ScrollEvent> onScrollEventHandler = new EventHandler<ScrollEvent>() {
 
         @Override
         public void handle(ScrollEvent event) {

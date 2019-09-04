@@ -1,27 +1,35 @@
 package cells;
 
 import graph.Graph;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import java.util.Random;
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
+import javafx.scene.control.Cell;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
-public abstract class AbstractCell implements ICell {
+public abstract class AbstractCell implements ICell, Serializable {
     
     protected int ID;
 
     protected boolean toConnect = false;
-    protected Shape view = null;
+    protected transient Shape view = null;
     final DragContext dragContext = new DragContext();
     
     public Shape getView() {
@@ -33,6 +41,8 @@ public abstract class AbstractCell implements ICell {
 
     public void updateRng(Random rng) {
     }
+    
+    public abstract void createView();
 
     @Override
     public Shape getGraphic(Graph graph) {
@@ -51,12 +61,16 @@ public abstract class AbstractCell implements ICell {
         }
 
         Connectable this_connectable = (Connectable) this;
+        
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 if (event.getButton() == MouseButton.SECONDARY) {
-                    ContextMenu contextMenu = createContextMenu(event, graph);
+                    ContextMenu contextMenu = createContextMenu(graph);
+                    contextMenu.setAutoHide(true);
                     contextMenu.show(view, event.getScreenX(), event.getScreenY());
+                    event.consume();
+        
                     
                 }
             }
@@ -65,17 +79,20 @@ public abstract class AbstractCell implements ICell {
         return view;
     }
 
-    public static class DragContext {
+    public static class DragContext implements Serializable {
         double x;
         double y;
     }
     
     public void updateColor() {
+        Color color;
         if (toConnect) {
-            view.setFill(Color.GRAY);
+            color = Color.GRAY;
         } else {
-            view.setFill(Color.WHITE);
+            color = Color.WHITE;
         }
+        view.setFill(new RadialGradient(0, 0, .5, .5, 2.5, true, CycleMethod.NO_CYCLE, new Stop(0, color), new Stop(1, Color.BLACK)));
+
     }
 
     public boolean getToConnect() {
@@ -88,9 +105,16 @@ public abstract class AbstractCell implements ICell {
         this.updateColor();
     }
     
-    public abstract ContextMenu createContextMenu(MouseEvent menu, Graph graph);
+    public abstract ContextMenu createContextMenu(Graph graph);
     
     public abstract int getCount();
+    
+    private void readObject(ObjectInputStream aInputStream)
+    throws ClassNotFoundException, IOException {
+          aInputStream.defaultReadObject();
+          createView();
+    
+    }
     
     
 

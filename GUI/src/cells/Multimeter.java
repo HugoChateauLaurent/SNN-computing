@@ -37,7 +37,6 @@ public class Multimeter extends AbstractDetector {
     public Multimeter(List<AbstractNode> targets, MainApp app) {
         super(targets, count, app);
         count++;
-        this.view = new Rectangle(100, 100);
     }
 
     public Multimeter(MainApp app) {

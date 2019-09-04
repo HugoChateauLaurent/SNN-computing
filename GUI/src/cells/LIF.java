@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -14,7 +13,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
 import javafx.scene.layout.Pane;
@@ -59,6 +57,10 @@ public class LIF extends AbstractNode implements Connectable {
         record_V = true;
         record_spikes = true;
         
+        
+    }
+    
+    public void createView() {
         this.view = new Ellipse(50, 50);
     }
     

@@ -1,10 +1,11 @@
 package graph;
 
+import java.io.Serializable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.layout.Pane;
 
-public class PannableCanvas extends Pane {
+public class PannableCanvas extends Pane implements Serializable {
 
 	private final DoubleProperty scaleProperty;
 
@@ -38,7 +39,7 @@ public class PannableCanvas extends Pane {
 	/**
 	 * Mouse drag context used for scene and nodes.
 	 */
-	public static class DragContext {
+	public static class DragContext implements Serializable {
 
 		double mouseAnchorX;
 		double mouseAnchorY;

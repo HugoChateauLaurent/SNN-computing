@@ -14,6 +14,10 @@ import cells.Multimeter;
 import cells.Raster;
 import edges.DetectorEdge;
 import edges.Synapse;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -41,15 +45,17 @@ public class Model implements Serializable {
 
     private static final long serialVersionUID = 172247271876446110L;
 
-    private ObservableList<ICell> allCells;
+    private ArrayList<ICell> allCellsSerialization;
+    private transient ObservableList<ICell> allCells;
     private transient ObservableList<ICell> addedCells;
     private transient ObservableList<ICell> removedCells;
 
-    private ObservableList<IEdge> allEdges;
+    private ArrayList<IEdge> allEdgesSerialization;
+    private transient ObservableList<IEdge> allEdges;
     private transient ObservableList<IEdge> addedEdges;
     private transient ObservableList<IEdge> removedEdges;
 
-    private Graph graph;
+    private transient Graph graph;
 
     public Model() {
         // clear model, create lists
@@ -451,6 +457,38 @@ public class Model implements Serializable {
     private void init() {
         for (ICell cell : allCells) {
             cell.init();
+        }
+    }
+    
+    private void readObject(ObjectInputStream aInputStream)
+    throws ClassNotFoundException, IOException {
+        aInputStream.defaultReadObject();
+        allCells = FXCollections.observableArrayList(allCellsSerialization);
+        allEdges = FXCollections.observableArrayList(allEdgesSerialization);
+
+        addedCells = FXCollections.observableArrayList();
+        removedCells = FXCollections.observableArrayList();
+        addedEdges = FXCollections.observableArrayList();
+        removedEdges = FXCollections.observableArrayList();
+    
+    }
+
+    private void writeObject(ObjectOutputStream aOutputStream)
+        throws IOException {
+            allCellsSerialization = new ArrayList<ICell>(allCells);
+            allEdgesSerialization = new ArrayList<IEdge>(allEdges);
+            aOutputStream.defaultWriteObject();
+    }
+    
+    public void setDetectorsApp(MainApp app) {
+        for (AbstractDetector detector : getAllDetectors()) {
+            detector.setApp(app);
+        }
+    }
+    
+    public void createVisualizers() {
+        for (AbstractDetector detector : getAllDetectors()) {
+            detector.createVisualizer();
         }
     }
 

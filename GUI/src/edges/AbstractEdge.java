@@ -2,6 +2,7 @@ package edges;
 
 import cells.ICell;
 import graph.Graph;
+import java.io.Serializable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Group;
@@ -14,11 +15,11 @@ import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
-public abstract class AbstractEdge implements IEdge {
+public abstract class AbstractEdge implements IEdge, Serializable {
 
     private final ICell source;
     private final ICell target;
-    private Shape view;
+    private transient Shape view;
 
     public AbstractEdge(ICell source, ICell target) {
         this.source = source;

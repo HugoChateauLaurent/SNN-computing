@@ -8,6 +8,16 @@ import cells.Raster;
 import edges.DetectorEdge;
 import edges.Synapse;
 import java.awt.Canvas;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import layout.RandomLayout;
 
 import javafx.application.Application;
@@ -36,47 +46,44 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import visualizer.AbstractVisualizer;
 import visualizer.MultimeterVisualizer;
 
 public class MainApp extends Application {
 
-    private Graph graph;
+    private Graph graph = new Graph(this);
     
     private SplitPane window;
     private MenuBar menu; // top
-    private PannableCanvas graph_workspace;
     private ScrollPane visualizers;
+    private File saveFile;
+    private Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
         primaryStage.setTitle("Spiking simulator GUI");
-        
         
         // full screen
         //primaryStage.setMaximized(true);
         
         window = new SplitPane();
         window.setOrientation(Orientation.VERTICAL);
-
         
-        menu = makeMenu();
+        menu = makeMenu(primaryStage);
         
-        graph = new Graph(this);
-        graph_workspace = graph.getCanvas();
-        
-        
-        
+        System.out.println(graph);
+        System.out.println(graph.getCanvas());
+        PannableCanvas graph_workspace = graph.getCanvas();
         
         HBox visualizers_hbox = new HBox();
         visualizers_hbox.setSpacing(20);
         visualizers = new ScrollPane();
-
         
         //visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         visualizers.setContent(visualizers_hbox);
-        
         
         window.getItems().add(menu);
         window.getItems().add(graph_workspace);
@@ -91,13 +98,18 @@ public class MainApp extends Application {
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(750);
         primaryStage.show();
-
-        exampleElements();        
+        
+        exampleElements();
         updateHierarchy();
+        
     }
 
     public Graph getGraph() {
         return graph;
+    }
+    
+    public SplitPane getWindow() {
+        return window;
     }
     
     public ScrollPane getVisualizers() {
@@ -108,25 +120,17 @@ public class MainApp extends Application {
         menu.toFront();
     }
 
-    private MenuBar makeMenu() {
+    private MenuBar makeMenu(Stage stage) {
+        MainApp app = this;
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("File");
-        MenuItem item = new MenuItem("Open");
-        item.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                System.out.println("Open");
-                System.out.println("Open not implemented");
-            }
-        });
-        menu.getItems().add(item);
-
-        item = new MenuItem("Save as");
+        MenuItem item = new MenuItem("Save as");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save as");
-                System.out.println("Save as not implemented");
+                app.saveAs(stage);
+                app.save();
             }
         });
         menu.getItems().add(item);
@@ -136,11 +140,29 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save");
-                System.out.println("Save not implemented");
+                if (saveFile == null) {
+                    System.out.println("Calling save as");
+                    app.saveAs(stage);
+                }
+                app.save();
             }
         });
         menu.getItems().add(item);
         menuBar.getMenus().add(menu);
+        
+        item = new MenuItem("Open");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                System.out.println("Open");
+                Model model = open_file(stage);
+                if (app != null) {
+                    System.out.println("Opening model");
+                    load_model(model);
+                }
+            }
+        });
+        menu.getItems().add(item);
 
         menu = new Menu("Create");
         item = new MenuItem("LIF");
@@ -253,7 +275,7 @@ public class MainApp extends Application {
         
         graph.layout(new RandomLayout());
         
-        Ellipse ellipse_blue = new Ellipse(30,30);
+        /*Ellipse ellipse_blue = new Ellipse(30,30);
         ellipse_blue.setStyle("-fx-fill: radial-gradient(center 100% 50%, radius 100%, blue, white 30%);"
                 + "-fx-stroke: radial-gradient(center 100% 50%, radius 100%, blue, black 30%);");
         ellipse_blue.strokeWidthProperty().set(5);
@@ -268,12 +290,102 @@ public class MainApp extends Application {
         
         
         
-        graph.getCanvas().getChildren().addAll(ellipse_blue, ellipse_red);
+        graph.getCanvas().getChildren().addAll(ellipse_blue, ellipse_red);*/
         
         
     }
     
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void saveAs(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+ 
+        //Set extension filter for text files
+        //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+        //fileChooser.getExtensionFilters().add(extFilter);
+
+        //Show save file dialog
+        saveFile = fileChooser.showSaveDialog(stage);
+    }
+
+    private void save() {
+        try {
+            FileOutputStream fileOut = new FileOutputStream(saveFile);
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+            objectOut.writeObject(graph.getModel());
+            objectOut.close();
+            System.out.println("The Object  was succesfully written to a file");
+ 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    private Model open_file(Stage stage) {
+ 
+        try {
+            
+            FileChooser fileChooser = new FileChooser();
+            //Set extension filter for text files
+            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+            //fileChooser.getExtensionFilters().add(extFilter);
+            //Show save file dialog
+            File openFile = fileChooser.showOpenDialog(stage);
+            
+            if(openFile != null) {
+ 
+                FileInputStream fileIn = new FileInputStream(openFile);
+                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+                Model model = (Model) objectIn.readObject();
+
+                System.out.println("The Object has been read from the file");
+                objectIn.close();
+                saveFile = openFile;
+                
+                return model;
+            }
+ 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    public void load_model(Model model) {
+        graph = new Graph(this, model);
+        model.setGraph(graph);
+        model.setDetectorsApp(this);
+        model.createVisualizers();
+        
+        graph.endUpdate();
+        
+        
+        PannableCanvas graph_workspace = graph.getCanvas();
+        
+        HBox visualizers_hbox = new HBox();
+        visualizers_hbox.setSpacing(20);
+        visualizers = new ScrollPane();
+        
+        //visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        visualizers.setContent(visualizers_hbox);
+        
+        window = new SplitPane();
+        window.setOrientation(Orientation.VERTICAL);
+        window.getItems().add(menu);
+        window.getItems().add(graph_workspace);
+        window.getItems().add(visualizers);
+        window.setDividerPosition(0, 0f);
+        window.setDividerPosition(1, 0.7f);
+        
+        final Scene scene = new Scene(window, 1200, 900);
+        scene.getStylesheets().add(getClass().getResource("design.css").toExternalForm());
+
+        primaryStage.setScene(scene);
+        primaryStage.setMinHeight(500);
+        primaryStage.setMinWidth(750);
+        primaryStage.show();
     }
 }

@@ -13,24 +13,36 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Rectangle;
 import visualizer.AbstractVisualizer;
 
 public abstract class AbstractDetector extends AbstractCell implements Connectable {
 
     List<AbstractNode> targets;    
     protected boolean toConnect;
-    protected AbstractVisualizer visualizer;
-    protected MainApp app;
+    protected transient AbstractVisualizer visualizer;
+    protected transient MainApp app;
 
     
     public AbstractDetector(List<AbstractNode> targets, int ID, MainApp app) {
         this.targets = targets;
         this.ID = ID;
         this.app = app;
+        createView();
+    }
+    
+    
+    
+    public void createView() {
+        this.view = new Rectangle(100, 100);
     }
     
     public List<AbstractNode> getTargets() {
         return targets;
+    }
+    
+    public void setApp(MainApp app) {
+        this.app = app;
     }
     
     public abstract void createVisualizer();
@@ -42,11 +54,18 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     }
         
     @Override
-    public ContextMenu createContextMenu(MouseEvent event, Graph graph){
+    public ContextMenu createContextMenu(Graph graph){
         
         Connectable this_connectable = (Connectable) this;
         
         final ContextMenu contextMenu = new ContextMenu();
+        /*contextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) {
+                System.out.println("hide");
+                contextMenu.hide();
+            }
+                
+        });*/
         
         MenuItem ID_label = new MenuItem("");
         ID_label.setDisable(true);
@@ -70,11 +89,11 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
             }
         });
         
-        MenuItem openVisualizer = new MenuItem("Show recordings");
+        MenuItem openVisualizer = new MenuItem("Show/hide recordings");
         openVisualizer.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Opening visualizer");
+                System.out.println("Showing/hiding visualizer");
                 displayVisualizer();
             }
         });
@@ -114,7 +133,11 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     
     public void displayVisualizer() {
         HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
-        visualizers_hbox.getChildren().add(visualizer);
+        if (visualizers_hbox.getChildren().contains(visualizer)) {
+            visualizers_hbox.getChildren().remove(visualizer);
+        } else {
+            visualizers_hbox.getChildren().add(visualizer);
+        }
     }
 
     public AbstractVisualizer getVisualizer() {
