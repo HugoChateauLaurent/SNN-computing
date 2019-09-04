@@ -31,6 +31,11 @@ public class NodeGestures implements Serializable {
 
         @Override
         public void handle(MouseEvent event) {
+            
+            if (event.isSecondaryButtonDown()) {
+                return;
+            }
+            
             final Node node = (Node) event.getSource();
 
             final double scale = graph.getScale();
@@ -44,6 +49,11 @@ public class NodeGestures implements Serializable {
 
         @Override
         public void handle(MouseEvent event) {
+            
+            if (event.isSecondaryButtonDown()) {
+                return;
+            }
+            
             final Node node = (Node) event.getSource();
 
             double offsetX = event.getScreenX() + dragContext.x;

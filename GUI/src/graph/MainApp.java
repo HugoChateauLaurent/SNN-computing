@@ -28,10 +28,12 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPane.Divider;
 import javafx.scene.layout.BorderPane;
@@ -48,6 +50,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import serialization.Serialization;
 import visualizer.AbstractVisualizer;
 import visualizer.MultimeterVisualizer;
 
@@ -99,7 +102,7 @@ public class MainApp extends Application {
         primaryStage.setMinWidth(750);
         primaryStage.show();
         
-        exampleElements();
+        //exampleElements();
         updateHierarchy();
         
     }
@@ -155,16 +158,22 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Open");
-                Model model = open_file(stage);
-                if (app != null) {
+                Serialization serialization = open_file(stage);
+                if (serialization != null) {
                     System.out.println("Opening model");
-                    load_model(model);
+                    load_serialization(serialization);
                 }
             }
         });
         menu.getItems().add(item);
 
         menu = new Menu("Create");
+        
+        item = new MenuItem("Nodes");
+        item.setDisable(true);
+        item.getStyleClass().add("context-menu-title");
+        menu.getItems().add(item);
+        
         item = new MenuItem("LIF");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -174,6 +183,7 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
+        
         item = new MenuItem("Spike train");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -182,7 +192,9 @@ public class MainApp extends Application {
                 graph.endUpdate();
             }
         });
+        item.setDisable(true);
         menu.getItems().add(item);
+        
         item = new MenuItem("Poisson");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -191,7 +203,16 @@ public class MainApp extends Application {
                 graph.endUpdate();
             }
         });
+        item.setDisable(true);
         menu.getItems().add(item);
+        
+        menu.getItems().add(new SeparatorMenuItem());
+        
+        item = new MenuItem("Detectors");
+        item.setDisable(true);
+        item.getStyleClass().add("context-menu-title");
+        menu.getItems().add(item);
+        
         item = new MenuItem("Multimeter");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -201,6 +222,7 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
+        
         item = new MenuItem("Raster");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -312,18 +334,21 @@ public class MainApp extends Application {
 
     private void save() {
         try {
-            FileOutputStream fileOut = new FileOutputStream(saveFile);
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-            objectOut.writeObject(graph.getModel());
-            objectOut.close();
-            System.out.println("The Object  was succesfully written to a file");
+            if (saveFile != null) {
+                FileOutputStream fileOut = new FileOutputStream(saveFile);
+                ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+                Serialization serialization = new Serialization(graph.getModel());
+                objectOut.writeObject(serialization);
+                objectOut.close();
+                System.out.println("The Object  was succesfully written to a file");
+            }
  
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
     
-    private Model open_file(Stage stage) {
+    private Serialization open_file(Stage stage) {
  
         try {
             
@@ -339,13 +364,13 @@ public class MainApp extends Application {
                 FileInputStream fileIn = new FileInputStream(openFile);
                 ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
-                Model model = (Model) objectIn.readObject();
+                Serialization serialization = (Serialization) objectIn.readObject();
 
                 System.out.println("The Object has been read from the file");
                 objectIn.close();
                 saveFile = openFile;
                 
-                return model;
+                return serialization;
             }
  
         } catch (Exception ex) {
@@ -354,7 +379,8 @@ public class MainApp extends Application {
         return null;
     }
     
-    public void load_model(Model model) {
+    public void load_serialization(Serialization serialization) {
+        Model model = serialization.getModel();
         graph = new Graph(this, model);
         model.setGraph(graph);
         model.setDetectorsApp(this);

@@ -142,8 +142,4 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
     
     public abstract void editProperties();
     
-    public void delete() {
-        
-    }
-    
 }

@@ -106,14 +106,16 @@ public abstract class AbstractCell implements ICell, Serializable {
     }
     
     public abstract ContextMenu createContextMenu(Graph graph);
-    
-    public abstract int getCount();
-    
+        
     private void readObject(ObjectInputStream aInputStream)
     throws ClassNotFoundException, IOException {
           aInputStream.defaultReadObject();
           createView();
     
+    }
+    
+    public void delete() {
+        System.out.println("Delete not implemented");
     }
     
     

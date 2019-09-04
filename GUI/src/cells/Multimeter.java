@@ -29,6 +29,9 @@ import visualizer.MultimeterVisualizer;
  */
 public class Multimeter extends AbstractDetector {
     
+    private static final long serialVersionUID = 3L;
+
+    
     private static int count = 1;
 
     private double[][] V; // [target][t]
@@ -69,9 +72,12 @@ public class Multimeter extends AbstractDetector {
         visualizer = new MultimeterVisualizer(app, this, false);
     }
     
-    @Override
-    public int getCount() {
+    public static int getCount() {
         return count;
+    }
+    
+    public static void setCount(int newCount) {
+        count = newCount;
     }
 
 }

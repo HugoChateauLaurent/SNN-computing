@@ -43,7 +43,7 @@ import javafx.util.Pair;
 
 public class Model implements Serializable {
 
-    private static final long serialVersionUID = 172247271876446110L;
+    private static final long serialVersionUID = 1L;
 
     private ArrayList<ICell> allCellsSerialization;
     private transient ObservableList<ICell> allCells;

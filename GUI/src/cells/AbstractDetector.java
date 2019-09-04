@@ -127,10 +127,6 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         System.out.println("Edit properties not implemented");
     }
     
-    public void delete() {
-        System.out.println("Delete not implemented");
-    }
-    
     public void displayVisualizer() {
         HBox visualizers_hbox = (HBox) app.getVisualizers().getContent();
         if (visualizers_hbox.getChildren().contains(visualizer)) {

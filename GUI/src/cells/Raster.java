@@ -25,6 +25,9 @@ public class Raster extends AbstractDetector {
 
     private static int count = 1;
     
+    private static final long serialVersionUID = 4L;
+
+    
     private boolean[][] spikes; // [target][t]
     private int index;
 
@@ -70,8 +73,13 @@ public class Raster extends AbstractDetector {
         visualizer = new RasterVisualizer(app, this, false);
     }
     
-    @Override
-    public int getCount() {
+    public static int getCount() {
         return count;
     }
+    
+    public static void setCount(int newCount) {
+        count = newCount;
+    }
+    
+    
 }

@@ -25,6 +25,8 @@ public class LIF extends AbstractNode implements Connectable {
     
     private static int count = 1;
     
+    private static final long serialVersionUID = 2L;
+    
     private boolean toConnect = false;
     
     //parameters
@@ -86,11 +88,6 @@ public class LIF extends AbstractNode implements Connectable {
 
     public double getV() {
         return V;
-    }
-    
-    @Override
-    public int getCount() {
-        return count;
     }
     
     public void editProperties() {
@@ -169,6 +166,14 @@ public class LIF extends AbstractNode implements Connectable {
         }
         return null;
 
+    }
+    
+    public static int getCount() {
+        return count;
+    }
+    
+    public static void setCount(int newCount) {
+        count = newCount;
     }
 
     
