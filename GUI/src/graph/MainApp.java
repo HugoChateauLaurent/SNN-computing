@@ -58,6 +58,8 @@ public class MainApp extends Application {
 
     private Graph graph = new Graph(this);
     
+    private static File defaultFile = new File("default.network");
+    
     private SplitPane window;
     private MenuBar menu; // top
     private ScrollPane visualizers;
@@ -67,7 +69,8 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("Spiking simulator GUI");
+        saveFile = defaultFile;
+        updateTitle();
         
         // full screen
         //primaryStage.setMaximized(true);
@@ -127,33 +130,22 @@ public class MainApp extends Application {
         MainApp app = this;
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("File");
-        MenuItem item = new MenuItem("Save as");
-        item.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                System.out.println("Save as");
-                app.saveAs(stage);
-                app.save();
-            }
-        });
-        menu.getItems().add(item);
-
-        item = new MenuItem("Save");
-        item.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent t) {
-                System.out.println("Save");
-                if (saveFile == null) {
-                    System.out.println("Calling save as");
-                    app.saveAs(stage);
-                }
-                app.save();
-            }
-        });
-        menu.getItems().add(item);
-        menuBar.getMenus().add(menu);
         
-        item = new MenuItem("Open");
+        MenuItem item = new MenuItem("New");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                System.out.println("Opening default network");
+                Serialization serialization = open_file(stage, new File("default.network"));
+                if (serialization != null) {
+                    System.out.println("Opening model");
+                    load_serialization(serialization);
+                }
+            }
+        });
+        menu.getItems().add(item);
+        
+        item = new MenuItem("Open...");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
@@ -167,6 +159,32 @@ public class MainApp extends Application {
         });
         menu.getItems().add(item);
 
+        item = new MenuItem("Save");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                System.out.println("Save");
+                if (saveFile == null || saveFile.getName()==defaultFile.getName()) {
+                    System.out.println("Calling save as");
+                    app.saveAs(stage);
+                }
+                app.save();
+            }
+        });
+        menu.getItems().add(item);
+        menuBar.getMenus().add(menu);
+        
+        item = new MenuItem("Save as");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                System.out.println("Save as");
+                app.saveAs(stage);
+                app.save();
+            }
+        });
+        menu.getItems().add(item);
+        
         menu = new Menu("Create");
         
         item = new MenuItem("Nodes");
@@ -329,23 +347,57 @@ public class MainApp extends Application {
         //fileChooser.getExtensionFilters().add(extFilter);
 
         //Show save file dialog
-        saveFile = fileChooser.showSaveDialog(stage);
+        File newSaveFile = fileChooser.showSaveDialog(stage);
+        if (newSaveFile != null && saveFile.getName() != defaultFile.getName()) {
+            saveFile = newSaveFile;
+            updateTitle();
+        } else {
+            System.out.println("Cannot save as: "+newSaveFile);
+        }
+            
     }
 
     private void save() {
         try {
-            if (saveFile != null) {
+            if (saveFile != null && saveFile.getName() != defaultFile.getName()) {
+                System.out.println("Save: "+saveFile.getName());
                 FileOutputStream fileOut = new FileOutputStream(saveFile);
                 ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
                 Serialization serialization = new Serialization(graph.getModel());
                 objectOut.writeObject(serialization);
                 objectOut.close();
-                System.out.println("The Object  was succesfully written to a file");
+                System.out.println("The Object was succesfully written to a file");
+            } else {
+                System.out.println("Cannot save file: "+saveFile.getName());
             }
  
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+    
+    private Serialization open_file(Stage stage, File openFile) {
+ 
+        try {
+            if(openFile != null) {
+ 
+                FileInputStream fileIn = new FileInputStream(openFile);
+                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+                Serialization serialization = (Serialization) objectIn.readObject();
+
+                System.out.println("The Object has been read from the file");
+                objectIn.close();
+                saveFile = openFile;
+                updateTitle();
+                
+                return serialization;
+            }
+ 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
     
     private Serialization open_file(Stage stage) {
@@ -361,16 +413,7 @@ public class MainApp extends Application {
             
             if(openFile != null) {
  
-                FileInputStream fileIn = new FileInputStream(openFile);
-                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-
-                Serialization serialization = (Serialization) objectIn.readObject();
-
-                System.out.println("The Object has been read from the file");
-                objectIn.close();
-                saveFile = openFile;
-                
-                return serialization;
+                open_file(stage, openFile);
             }
  
         } catch (Exception ex) {
@@ -413,5 +456,9 @@ public class MainApp extends Application {
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(750);
         primaryStage.show();
+    }
+
+    private void updateTitle() {
+        primaryStage.setTitle("Spiking simulator GUI - "+ saveFile.getName());
     }
 }
