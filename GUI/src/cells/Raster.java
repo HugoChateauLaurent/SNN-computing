@@ -59,16 +59,6 @@ public class Raster extends AbstractDetector {
     public boolean[][] getSpikes() {
         return spikes;
     }
-    
-    @Override
-    public boolean getToConnect() {
-        return toConnect;
-    }
-
-    @Override
-    public void updateToConnect(boolean toConnect) {
-        this.toConnect = toConnect;
-    }
 
     public void createVisualizer() {
         visualizer = new RasterVisualizer(model.getGraph().getApp(), this, false);

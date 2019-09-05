@@ -52,7 +52,7 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     @Override
     public ContextMenu createContextMenu(Graph graph){
         
-        Connectable this_connectable = (Connectable) this;
+        final Connectable this_connectable = (Connectable) this;
         
         final ContextMenu contextMenu = new ContextMenu();
         /*contextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
@@ -79,9 +79,8 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         connect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Connection mode: " + String.valueOf(!toConnect));
-                updateToConnect(!toConnect);
-                graph.getModel().tryToConnect(this_connectable);
+                this_connectable.updateToConnect(!this_connectable.getToConnect());
+                model.tryToConnect(this_connectable);
             }
         });
         
@@ -91,15 +90,6 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
             public void handle(ActionEvent event) {
                 System.out.println("Showing/hiding visualizer");
                 displayVisualizer();
-            }
-        });
-        
-        MenuItem properties = new MenuItem("Open/edit properties");
-        properties.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Editing properties");
-                editProperties();
             }
         });
         
@@ -113,14 +103,10 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         });
         
         
-        contextMenu.getItems().addAll(ID_label, connect, openVisualizer, properties, delete);
+        contextMenu.getItems().addAll(ID_label, connect, openVisualizer, delete);
         
         return contextMenu;
         
-    }
-    
-    public void editProperties(){
-        System.out.println("Edit properties not implemented");
     }
     
     public void displayVisualizer() {

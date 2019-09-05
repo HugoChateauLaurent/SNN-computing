@@ -87,9 +87,8 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         connect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Connection mode: " + String.valueOf(!toConnect));
-                updateToConnect(!toConnect);
-                graph.getModel().tryToConnect(this_connectable);
+                this_connectable.updateToConnect(!this_connectable.getToConnect());
+                model.tryToConnect(this_connectable);
             }
         });
         
@@ -119,7 +118,7 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         delete.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                graph.getModel().beginUpdate();
+                model.beginUpdate();
                 lif.getGraphic(graph).toFront();
                 graph.endUpdate();
             }
@@ -129,7 +128,7 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         delete.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                graph.getModel().beginUpdate();
+                model.beginUpdate();
                 lif.getGraphic(graph).toBack();
                 graph.endUpdate();
             }

@@ -164,66 +164,62 @@ public class Model implements Serializable {
         allEdges.add(edge);
     }
 
-    public boolean tryToConnect(Connectable post) {
-        Connectable pre = null;
+    public void tryToConnect(Connectable c1) {
+        Connectable c2 = null;
         Connectable iCell;
 
         for (final ICell cell : allCells) {
 
-            if (cell instanceof Connectable && cell != post) {
+            if (cell instanceof Connectable && cell != c1) {
                 iCell = (Connectable) cell;
 
                 if (iCell.getToConnect()) {
-                    pre = iCell;
+                    c2 = iCell;
                 }
             }
         }
                 
                 
-        if (pre == null) {
-            return false;
-        } else {
+        if (c2 != null) {
             
-            if (!(pre instanceof AbstractDetector) && !(post instanceof AbstractDetector)) {
+            if (!(c2 instanceof AbstractDetector) && !(c1 instanceof AbstractDetector)) {
                 
                 Pair params = Synapse.askParameters();
                 if (params != null) {
                     
-                    addSynapse((ICell) pre, (ICell) post, (double) params.getKey(), (int) params.getValue());
+                    addSynapse((ICell) c2, (ICell) c1, (double) params.getKey(), (int) params.getValue());
 
-                    pre.updateToConnect(false);
-                    post.updateToConnect(false);
+                    c2.updateToConnect(false);
+                    c1.updateToConnect(false);
 
-                    return true;
                 } else {
-                    pre.updateToConnect(false);
-                    post.updateToConnect(false);
-                    return false;
+                    c2.updateToConnect(false);
+                    c1.updateToConnect(false);
                 }
-            } else if (!(pre instanceof AbstractDetector) && post instanceof AbstractDetector) {
+            } else if (!(c2 instanceof AbstractDetector) && c1 instanceof AbstractDetector) {
                 
             
-                AbstractNode target = (AbstractNode) pre;
-                AbstractCell detector = (AbstractCell) post;
+                AbstractNode target = (AbstractNode) c2;
+                AbstractCell detector = (AbstractCell) c1;
                 addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 
-                pre.updateToConnect(false);
-                post.updateToConnect(false);
-                return true;
+                c2.updateToConnect(false);
+                c1.updateToConnect(false);
                 
-            } else if (!(post instanceof AbstractDetector) && pre instanceof AbstractDetector) {
+            } else if (!(c1 instanceof AbstractDetector) && c2 instanceof AbstractDetector) {
                 
             
-                AbstractNode target = (AbstractNode) post;
-                AbstractCell detector = (AbstractCell) pre;
+                AbstractNode target = (AbstractNode) c1;
+                AbstractCell detector = (AbstractCell) c2;
                 addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 
-                pre.updateToConnect(false);
-                post.updateToConnect(false);
-                return true;
+                c2.updateToConnect(false);
+                c1.updateToConnect(false);
                 
-            } else {
-                return false;
+            } else if (c1 instanceof AbstractDetector && c2 instanceof AbstractDetector) {
+                System.out.println("Cannot connect two detectors");
+                c1.updateToConnect(false);
+                c2.updateToConnect(false);
             }
 
         }
@@ -355,7 +351,6 @@ public class Model implements Serializable {
         aInputStream.defaultReadObject();
         allCells = FXCollections.observableArrayList(allCellsSerialization);
         allEdges = FXCollections.observableArrayList(allEdgesSerialization);
-        System.out.println("Reading model Cells: "+allCells.size());
     
     }
 
@@ -363,8 +358,6 @@ public class Model implements Serializable {
         throws IOException {
             allCellsSerialization = new ArrayList<ICell>(allCells);
             allEdgesSerialization = new ArrayList<IEdge>(allEdges);
-            System.out.println("Serializing Cells: "+allCellsSerialization.size());
-            System.out.println("Serializing Edges: "+allEdgesSerialization.size());
             aOutputStream.defaultWriteObject();
     }
     

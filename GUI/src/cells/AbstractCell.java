@@ -76,18 +76,30 @@ public abstract class AbstractCell implements ICell, Serializable {
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton() == MouseButton.SECONDARY) {
+                if (event.getButton().equals(MouseButton.SECONDARY)) {
                     ContextMenu contextMenu = createContextMenu(graph);
                     contextMenu.setAutoHide(true);
                     contextMenu.show(view, event.getScreenX(), event.getScreenY());
                     event.consume();
         
                     
-                }
+                } else if(event.getButton().equals(MouseButton.PRIMARY)){
+                    if(event.getClickCount() == 2){
+                        doubleClick();
+                    }
+        }
             }
         });
         
         return view;
+    }
+    
+    public void doubleClick() {
+        if (this instanceof Connectable) {
+            Connectable this_connectable = (Connectable) this;
+            this_connectable.updateToConnect(!this_connectable.getToConnect());
+            model.tryToConnect(this_connectable);
+        }            
     }
 
     public static class DragContext implements Serializable {
@@ -110,9 +122,8 @@ public abstract class AbstractCell implements ICell, Serializable {
         return toConnect;
     }
 
-    public void updateToConnect(boolean toConnect) {
-        System.out.println("updatetoconnect"+String.valueOf(toConnect));
-        this.toConnect = toConnect;
+    public void updateToConnect(boolean newToConnect) {
+        this.toConnect = newToConnect;
         this.updateColor();
     }
     

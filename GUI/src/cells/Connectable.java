@@ -12,7 +12,7 @@ import javafx.scene.layout.Region;
 
 public interface Connectable extends IGraphNode {
 
-    public boolean getToConnect();
-    public void updateToConnect(boolean toConnect);
+    public abstract boolean getToConnect();
+    public abstract void updateToConnect(boolean toConnect);
 
 }
