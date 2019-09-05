@@ -2,10 +2,17 @@ package edges;
 
 import cells.ICell;
 import graph.Graph;
+import graph.Model;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -16,15 +23,20 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 public abstract class AbstractEdge implements IEdge, Serializable {
+    
+    protected int ID;
 
     private final ICell source;
     private final ICell target;
     private transient Shape view;
+    protected Model model;
 
-    public AbstractEdge(ICell source, ICell target) {
+    public AbstractEdge(Model model, ICell source, ICell target, int ID) {
         this.source = source;
         this.target = target;
-        this.view = null;
+        this.ID = ID;
+        this.model = model;
+        createView();
 
         if (source == null) {
             throw new NullPointerException("Source cannot be null");
@@ -32,6 +44,10 @@ public abstract class AbstractEdge implements IEdge, Serializable {
         if (target == null) {
             throw new NullPointerException("Target cannot be null");
         }
+    }
+    
+    public void createView() {
+        view = new Line();
     }
 
     @Override
@@ -53,8 +69,7 @@ public abstract class AbstractEdge implements IEdge, Serializable {
      */
     @Override
     public Shape getGraphic(Graph graph) {
-        Line line = new Line();
-        view = line;
+        Line line = (Line) view;
 
         final DoubleBinding sourceX = source.getXAnchor(graph);
         final DoubleBinding sourceY = source.getYAnchor(graph);
@@ -71,14 +86,28 @@ public abstract class AbstractEdge implements IEdge, Serializable {
         line.endXProperty().addListener(o -> updateLineGradient());
         line.endYProperty().addListener(o -> updateLineGradient());
         
-        line.setStrokeWidth(5);
+        line.setStrokeWidth(8);
         
         updateLineGradient();
+        
+        view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = createContextMenu(graph);
+                    contextMenu.setAutoHide(true);
+                    contextMenu.show(view, event.getScreenX(), event.getScreenY());
+                    event.consume();
+                }
+            }
+        });
                 
-        return line;
+        return view;
     }
     
-    private void updateLineGradient() {
+    public abstract ContextMenu createContextMenu(Graph graph);
+    
+    protected void updateLineGradient() {
         Line line = (Line) view;
         Stop[] stops = new Stop[] {new Stop(0.3, new Color(0,0,0,1.0)), new Stop(1, getColor())};
         LinearGradient lg = new LinearGradient(line.startXProperty().get(), line.startYProperty().get(), line.endXProperty().get(), line.endYProperty().get(), false, CycleMethod.NO_CYCLE, stops);
@@ -90,7 +119,14 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     }
     
     public void delete() {
-        System.out.println("Delete edge not implemented");
+        model.getGraph().removeEdge(this);
+    }
+    
+    private void readObject(ObjectInputStream aInputStream)
+    throws ClassNotFoundException, IOException {
+          aInputStream.defaultReadObject();
+          createView();
+    
     }
 
 }

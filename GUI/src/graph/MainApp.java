@@ -136,10 +136,12 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Opening default network");
-                Serialization serialization = open_file(stage, new File("default.network"));
+                Serialization serialization = openFile(stage, new File("default.network"));
                 if (serialization != null) {
                     System.out.println("Opening model");
                     load_serialization(serialization);
+                } else {
+                    System.out.println("Null serialization");
                 }
             }
         });
@@ -150,10 +152,12 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Open");
-                Serialization serialization = open_file(stage);
+                Serialization serialization = chooseAndOpenFile(stage);
                 if (serialization != null) {
                     System.out.println("Opening model");
                     load_serialization(serialization);
+                } else {
+                    System.out.println("Null serialization");
                 }
             }
         });
@@ -294,10 +298,10 @@ public class MainApp extends Application {
         Multimeter multi = graph.getModel().createMultimeter();
         
         //connect detector and neurons
-        graph.getModel().addEdge(new DetectorEdge(neuron,raster));
-        graph.getModel().addEdge(new DetectorEdge(neuron2,raster));
-        graph.getModel().addEdge(new DetectorEdge(neuron,multi));
-        graph.getModel().addEdge(new DetectorEdge(neuron2,multi));
+        graph.getModel().addEdge(new DetectorEdge(graph.getModel(), neuron,raster));
+        graph.getModel().addEdge(new DetectorEdge(graph.getModel(), neuron2,raster));
+        graph.getModel().addEdge(new DetectorEdge(graph.getModel(), neuron,multi));
+        graph.getModel().addEdge(new DetectorEdge(graph.getModel(), neuron2,multi));
         
         //open visualizers
         raster.displayVisualizer();
@@ -342,7 +346,7 @@ public class MainApp extends Application {
 
         //Show save file dialog
         File newSaveFile = fileChooser.showSaveDialog(stage);
-        if (newSaveFile != null && saveFile.getName() != defaultFile.getName()) {
+        if (newSaveFile != null) {
             saveFile = newSaveFile;
             updateTitle();
         } else {
@@ -370,7 +374,7 @@ public class MainApp extends Application {
         }
     }
     
-    private Serialization open_file(Stage stage, File openFile) {
+    private Serialization openFile(Stage stage, File openFile) {
  
         try {
             if(openFile != null) {
@@ -378,14 +382,18 @@ public class MainApp extends Application {
                 FileInputStream fileIn = new FileInputStream(openFile);
                 ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
-                Serialization serialization = (Serialization) objectIn.readObject();
-
-                System.out.println("The Object has been read from the file");
+                Object obj = (Serialization) objectIn.readObject();
                 objectIn.close();
-                saveFile = openFile;
-                updateTitle();
-                
-                return serialization;
+
+                if (obj instanceof Serialization) {
+                    System.out.println("Loading serialization");
+                    saveFile = openFile;
+                    updateTitle();
+                    return (Serialization) obj;
+                } else {
+                    System.out.println("Cannot load object, not a Serialization: "+obj);
+                    return null;
+                }
             }
  
         } catch (Exception ex) {
@@ -394,7 +402,7 @@ public class MainApp extends Application {
         return null;
     }
     
-    private Serialization open_file(Stage stage) {
+    private Serialization chooseAndOpenFile(Stage stage) {
  
         try {
             
@@ -406,8 +414,9 @@ public class MainApp extends Application {
             File openFile = fileChooser.showOpenDialog(stage);
             
             if(openFile != null) {
- 
-                open_file(stage, openFile);
+                return openFile(stage, openFile);
+            } else {
+                System.out.println("Null file");
             }
  
         } catch (Exception ex) {
@@ -420,7 +429,11 @@ public class MainApp extends Application {
         Model model = serialization.getModel();
         graph = new Graph(this, model);
         model.setGraph(graph);
-        model.createVisualizers();        
+        graph.addCells(model.getAllCells(), false);
+        graph.addEdges(model.getAllEdges(), false);
+        
+        model.createVisualizers(); 
+        System.out.println(graph.getGraphics().size());
         
         PannableCanvas graph_workspace = graph.getCanvas();
         
@@ -446,6 +459,8 @@ public class MainApp extends Application {
         primaryStage.setMinHeight(500);
         primaryStage.setMinWidth(750);
         primaryStage.show();
+        
+        graph.layout(new RandomLayout());
     }
 
     private void updateTitle() {

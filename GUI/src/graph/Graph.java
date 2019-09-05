@@ -7,6 +7,8 @@ import cells.LIF;
 import cells.Multimeter;
 import cells.Raster;
 import edges.AbstractEdge;
+import edges.DetectorEdge;
+import edges.Synapse;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -23,16 +25,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Shape;
 
-public class Graph implements Serializable {
+public class Graph {
 
-    private final transient MainApp app;
+    private final MainApp app;
     private final Model model;
-    private final transient PannableCanvas pannableCanvas;
-    private final transient Map<IGraphNode, Shape> graphics;
-    private final transient NodeGestures nodeGestures;
-    private final transient ViewportGestures viewportGestures;
-    private final transient BooleanProperty useNodeGestures;
-    private final transient BooleanProperty useViewportGestures;
+    private final PannableCanvas pannableCanvas;
+    private final Map<IGraphNode, Shape> graphics;
+    private final NodeGestures nodeGestures;
+    private final ViewportGestures viewportGestures;
+    private final BooleanProperty useNodeGestures;
+    private final BooleanProperty useViewportGestures;
 
     public Graph(MainApp app) {
         this(app, new Model());
@@ -86,9 +88,13 @@ public class Graph implements Serializable {
         });
 
         graphics = new HashMap<>();
+        
+        System.out.println("cells in model: "+model.getAllCells().size());
+        System.out.println("Edges in model: "+model.getAllEdges().size());
+    }
 
-        addEdges(model.getAllEdges());
-        addCells(model.getAllCells());        
+    public Map<IGraphNode, Shape> getGraphics() {
+        return graphics;
     }
 
     public MainApp getApp() {
@@ -107,36 +113,40 @@ public class Graph implements Serializable {
         pannableCanvas.getChildren().clear();
     }
 
-    private void addEdges(List<IEdge> edges) {
+    public void addEdges(List<IEdge> edges, boolean addToModel) {
         for (IEdge edge : edges) {
-            addEdge(edge, false);
+            addEdge(edge, addToModel, false);
         }
         cellsToFront();
     }
     
-    public void addEdge(IEdge edge, boolean cellsToFront) {
+    public void addEdge(IEdge edge, boolean addToModel, boolean cellsToFront) {
         Shape graphic = getGraphic(edge);
         pannableCanvas.getChildren().add(graphic);
-        model.addEdge(edge);
+        if (addToModel) {
+            model.addEdge(edge);
+        }
         
         if (cellsToFront) {
             cellsToFront();
         }
     }
 
-    private void addCells(List<ICell> cells) {
+    public void addCells(List<ICell> cells, boolean addToModel) {
         for (ICell cell : cells) {
-            addCell(cell);
+            addCell(cell, addToModel);
         }
     }
     
-    public void addCell(ICell cell) {
+    public void addCell(ICell cell, boolean addToModel) {
         Shape graphic = getGraphic(cell);
         pannableCanvas.getChildren().add(graphic);
         if (useNodeGestures.get()) {
             nodeGestures.makeDraggable(graphic);
         }
-        model.addCell(cell);
+        if (addToModel) {
+            model.addCell(cell);
+        }
     }
 
     public Shape getGraphic(IGraphNode node) {
@@ -201,6 +211,12 @@ public class Graph implements Serializable {
         Shape edgeGraphic = getGraphic(edge);
         pannableCanvas.getChildren().remove(edgeGraphic);
         model.removeEdge(edge);
+        
+        if (edge instanceof DetectorEdge) {
+            DetectorEdge.setCount(DetectorEdge.getCount()-1);
+        } else if (edge instanceof Synapse) {
+            Synapse.setCount(Synapse.getCount()-1);
+        }
     }
     
     public void removeEdges(List<IEdge> edges) {
