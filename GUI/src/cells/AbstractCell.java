@@ -28,6 +28,8 @@ import javafx.scene.shape.Shape;
 public abstract class AbstractCell implements ICell, Serializable {
     
     protected int ID;
+    
+    private static final long serialVersionUID = 8L;
 
     protected boolean toConnect = false;
     protected transient Shape view = null;
@@ -87,7 +89,7 @@ public abstract class AbstractCell implements ICell, Serializable {
                     if(event.getClickCount() == 2){
                         doubleClick();
                     }
-        }
+                }
             }
         });
         

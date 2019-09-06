@@ -84,9 +84,11 @@ public class Synapse extends AbstractEdge {
     @Override
     protected Color getColor() {
         if (w < 0) {
-            return new Color(30f/255,144f/255,255f/255,1.0); // Blue
+            return Color.BLUE;
+            //return new Color(30f/255,144f/255,255f/255,1.0); // Blue
         } else {
-            return new Color(205f/255,92f/255,92f/255,0.8); // Red
+            return Color.RED;
+            //return new Color(205f/255,92f/255,92f/255,0.8); // Red
         }
     }
     

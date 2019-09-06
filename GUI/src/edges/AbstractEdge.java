@@ -1,5 +1,6 @@
 package edges;
 
+import cells.Connectable;
 import cells.ICell;
 import graph.Graph;
 import graph.Model;
@@ -23,6 +24,8 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 public abstract class AbstractEdge implements IEdge, Serializable {
+    
+    private static final long serialVersionUID = 7L;
     
     protected int ID;
 
@@ -93,11 +96,15 @@ public abstract class AbstractEdge implements IEdge, Serializable {
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton() == MouseButton.SECONDARY) {
+                if (event.getButton().equals(MouseButton.SECONDARY)) {
                     ContextMenu contextMenu = createContextMenu(graph);
                     contextMenu.setAutoHide(true);
                     contextMenu.show(view, event.getScreenX(), event.getScreenY());
                     event.consume();
+                } else if(event.getButton().equals(MouseButton.PRIMARY)){
+                    if(event.getClickCount() == 2){
+                        doubleClick();
+                    }
                 }
             }
         });
@@ -109,7 +116,7 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     
     protected void updateLineGradient() {
         Line line = (Line) view;
-        Stop[] stops = new Stop[] {new Stop(0.3, new Color(0,0,0,1.0)), new Stop(1, getColor())};
+        Stop[] stops = new Stop[] {new Stop(0, Color.WHITE), new Stop(1, getColor())};
         LinearGradient lg = new LinearGradient(line.startXProperty().get(), line.startYProperty().get(), line.endXProperty().get(), line.endYProperty().get(), false, CycleMethod.NO_CYCLE, stops);
         line.setStroke(lg);
     }
@@ -127,6 +134,14 @@ public abstract class AbstractEdge implements IEdge, Serializable {
           aInputStream.defaultReadObject();
           createView();
     
+    }
+    
+    public void doubleClick() {
+        if (this instanceof Synapse) {
+            Synapse synapse = (Synapse) this;
+            System.out.println("Editing properties");
+            synapse.editProperties();
+        }
     }
 
 }
