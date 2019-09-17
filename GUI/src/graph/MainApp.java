@@ -58,7 +58,10 @@ public class MainApp extends Application {
 
     private Graph graph = new Graph(this);
     
-    private static File defaultFile = new File("default.network");
+    private static String EXTENSION_NAME = ".net";
+    private static FileChooser.ExtensionFilter EXTENSION = new FileChooser.ExtensionFilter("Network files (*"+EXTENSION_NAME+".net)", "*"+EXTENSION_NAME);
+    private static File NETWORKS_DIRECTORY = new File("./networks");
+    private static File DEFAULT_FILE = new File(NETWORKS_DIRECTORY+"/default.net");
     
     private SplitPane window;
     private MenuBar menu; // top
@@ -69,7 +72,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        saveFile = defaultFile;
+        saveFile = DEFAULT_FILE;
         updateTitle();
         
         // full screen
@@ -136,7 +139,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Opening default network");
-                Serialization serialization = openFile(stage, new File("default.network"));
+                Serialization serialization = openFile(DEFAULT_FILE);
                 if (serialization != null) {
                     System.out.println("Opening model");
                     load_serialization(serialization);
@@ -147,7 +150,7 @@ public class MainApp extends Application {
         });
         menu.getItems().add(item);
         
-        item = new MenuItem("Open...");
+        item = new MenuItem("Open");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
@@ -168,11 +171,14 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save");
-                if (saveFile == null || saveFile.getName().equals(defaultFile.getName())) {
+                boolean save = true;
+                if (saveFile == null || saveFile.getName().equals(DEFAULT_FILE.getName())) {
                     System.out.println("Calling save as");
-                    app.saveAs(stage);
+                    save = app.saveAs(stage);
                 }
-                app.save();
+                if (save) {
+                    app.save();
+                }
             }
         });
         menu.getItems().add(item);
@@ -183,8 +189,10 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save as");
-                app.saveAs(stage);
-                app.save();
+                boolean save = app.saveAs(stage);
+                if (save) {
+                    app.save();
+                }
             }
         });
         menu.getItems().add(item);
@@ -337,50 +345,54 @@ public class MainApp extends Application {
         launch(args);
     }
 
-    private void saveAs(Stage stage) {
+    private boolean saveAs(Stage stage) {
         FileChooser fileChooser = new FileChooser();
- 
-        //Set extension filter for text files
-        //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
-        //fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setInitialDirectory(NETWORKS_DIRECTORY);
+        fileChooser.setInitialFileName("my_network.net");
+        fileChooser.getExtensionFilters().add(EXTENSION);
 
         //Show save file dialog
         File newSaveFile = fileChooser.showSaveDialog(stage);
-        if (newSaveFile != null) {
+        if (newSaveFile != null && newSaveFile.getName().endsWith(EXTENSION_NAME) && !newSaveFile.getName().equals(DEFAULT_FILE.getName())) {
             saveFile = newSaveFile;
             updateTitle();
+            return true;
+        } else if (newSaveFile.getName().equals(DEFAULT_FILE.getName())) {		
+                System.out.println("Cannot override default file");		
+        } else if (!newSaveFile.getName().endsWith(EXTENSION_NAME)) {
+            System.out.println("Wrong file extension. File name must be *" + EXTENSION_NAME);
         } else {
-            System.out.println("Cannot save as: "+newSaveFile);
+            System.out.println("Cannot save as: " + newSaveFile);
         }
+        return false;
             
     }
 
     private void save() {
         try {
-            if (saveFile != null && !saveFile.getName().equals(defaultFile.getName())) {
-                System.out.println("Save: "+saveFile.getName());
-                FileOutputStream fileOut = new FileOutputStream(saveFile);
-                ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-                Serialization serialization = new Serialization(graph.getModel());
-                objectOut.writeObject(serialization);
-                objectOut.close();
-                System.out.println("The Object was succesfully written to a file");
-            } else {
-                System.out.println("Cannot save file: "+saveFile.getName());
-            }
+            System.out.println("Save: "+saveFile.getName());
+            FileOutputStream fileOut = new FileOutputStream(saveFile);
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+            Serialization serialization = new Serialization(graph.getModel());
+            objectOut.writeObject(serialization);
+            objectOut.close();
+            System.out.println("The Object was succesfully written to a file");
  
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
     
-    private Serialization openFile(Stage stage, File openFile) {
+    private Serialization openFile(File openFile) {
  
         try {
             if(openFile != null) {
+                System.out.println(openFile.getAbsolutePath());
  
                 FileInputStream fileIn = new FileInputStream(openFile);
+                System.out.println("fileIn "+fileIn);
                 ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+                System.out.println("objectIn "+objectIn);
 
                 Object obj = (Serialization) objectIn.readObject();
                 objectIn.close();
@@ -407,14 +419,15 @@ public class MainApp extends Application {
         try {
             
             FileChooser fileChooser = new FileChooser();
-            //Set extension filter for text files
-            //FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
-            //fileChooser.getExtensionFilters().add(extFilter);
+            fileChooser.getExtensionFilters().add(EXTENSION);
+            fileChooser.setInitialDirectory(NETWORKS_DIRECTORY);
+            fileChooser.setInitialFileName("default.net");
+            
             //Show save file dialog
             File openFile = fileChooser.showOpenDialog(stage);
             
             if(openFile != null) {
-                return openFile(stage, openFile);
+                return openFile(openFile);
             } else {
                 System.out.println("Null file");
             }
