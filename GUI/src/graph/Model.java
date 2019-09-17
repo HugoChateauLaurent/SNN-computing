@@ -185,7 +185,7 @@ public class Model implements Serializable {
             if (!(c2 instanceof AbstractDetector) && !(c1 instanceof AbstractDetector)) {
                 
                 Pair params = Synapse.askParameters();
-                if (params != null) {
+                if (params != null && (Integer) params.getValue() > 0) {
                     
                     addSynapse((ICell) c2, (ICell) c1, (double) params.getKey(), (int) params.getValue());
 
@@ -193,6 +193,9 @@ public class Model implements Serializable {
                     c1.updateToConnect(false);
 
                 } else {
+                    if ((Integer) params.getValue() <= 0) {
+                        System.out.println("Delay must be at least 1");
+                    }
                     c2.updateToConnect(false);
                     c1.updateToConnect(false);
                 }
@@ -257,13 +260,21 @@ public class Model implements Serializable {
 
     public void step() {
 
-        // cells step
+        // nodes step
         for (ICell cell : allCells) {
-            cell.step();
+            if (cell instanceof AbstractNode) {
+                cell.step();
+            }
         }
         // edges step
         for (IEdge edge : allEdges) {
             edge.step();
+        }
+        // detectors step
+        for (ICell cell : allCells) {
+            if (cell instanceof AbstractDetector) {
+                cell.step();
+            }
         }
     }
 

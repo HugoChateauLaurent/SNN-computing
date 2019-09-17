@@ -56,6 +56,7 @@ public class LIF extends AbstractNode implements Connectable {
         this.thr = thr;
         this.I_e = I_e;
         this.noise = noise;
+        this.I = I_e;
         
         record_V = true;
         record_spikes = true;
@@ -79,7 +80,7 @@ public class LIF extends AbstractNode implements Connectable {
             V = V_rest;
         }
         this.I = this.I_e; // reset I with I_e
-        if (this.V > this.thr) { // check for spike
+        if (this.V >= this.thr) { // check for spike
             this.V = this.V_reset;
             this.out = this.amplitude;
         } else {

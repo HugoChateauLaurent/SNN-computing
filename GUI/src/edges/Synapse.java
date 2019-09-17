@@ -76,9 +76,9 @@ public class Synapse extends AbstractEdge {
     }
 
     public void step() {
-        this.out_pre[this.index] = this.pre.getOut(); // store current output of pre
-        this.index = (this.index + 1) % this.out_pre.length;
-        this.post.setI(this.post.getI() + this.w * this.out_pre[index]); // add w*pre_{t-d} to post 
+        out_pre[index] = pre.getOut(); // store current output of pre
+        index = (index + 1) % out_pre.length;
+        post.setI(post.getI() + w * out_pre[index]); // add w*pre_{t-d} to post 
     }
     
     @Override
