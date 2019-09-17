@@ -168,7 +168,7 @@ public class MainApp extends Application {
             @Override
             public void handle(ActionEvent t) {
                 System.out.println("Save");
-                if (saveFile == null || saveFile.getName()==defaultFile.getName()) {
+                if (saveFile == null || saveFile.getName().equals(defaultFile.getName())) {
                     System.out.println("Calling save as");
                     app.saveAs(stage);
                 }
@@ -357,7 +357,7 @@ public class MainApp extends Application {
 
     private void save() {
         try {
-            if (saveFile != null && saveFile.getName() != defaultFile.getName()) {
+            if (saveFile != null && !saveFile.getName().equals(defaultFile.getName())) {
                 System.out.println("Save: "+saveFile.getName());
                 FileOutputStream fileOut = new FileOutputStream(saveFile);
                 ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
