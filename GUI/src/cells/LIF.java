@@ -40,7 +40,7 @@ public class LIF extends AbstractNode implements Connectable {
     protected double I_e;
     protected double noise;
     
-    //recording parameters
+    //recording parameters for non implemented cell built-in detector
     protected boolean record_V;
     protected boolean record_spikes;
 
@@ -50,28 +50,28 @@ public class LIF extends AbstractNode implements Connectable {
         
         this.m = m;
         this.V_init = V_init;
-        init();
         this.V_reset = V_reset;
         this.V_rest = V_rest;
         this.thr = thr;
         this.I_e = I_e;
         this.noise = noise;
-        this.I = I_e;
         
         record_V = true;
         record_spikes = true;
         
+        init();        
         
     }
     
     public void createView() {
-        this.view = new Ellipse(50, 50);
+        view = new Ellipse(50, 50);
     }
     
     
     @Override
     public void init() {
-        this.V = V_init;
+        V = V_init;
+        I = I_e;
     }
     
     public void step() {
