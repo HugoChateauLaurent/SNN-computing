@@ -64,12 +64,20 @@ public class Raster extends AbstractDetector {
         visualizer = new RasterVisualizer(model.getGraph().getApp(), this, false);
     }
     
-    public static int getCount() {
-        return count;
+    public void increaseCount() {
+        count++;
+    }
+    
+    public void decreaseCount() {
+        count--;
     }
     
     public static void setCount(int newCount) {
         count = newCount;
+    }
+    
+    public static int getCount() {
+        return count;
     }
     
     

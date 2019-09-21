@@ -42,41 +42,44 @@ public class MultimeterVisualizer extends AbstractVisualizer {
         setCenter(plots);
         Multimeter detector = (Multimeter) this.detector; 
         double[][] V=null;
-        try {
-            V = detector.getV();
+        
+        V = detector.getV();
+        
+        if(V != null) {
             int steps = V.length;
-        } catch (Exception e) {
-            System.out.println("null");
-        }
-        
-        int n_targets = detector.getTargets().size();
-        
-        NumberAxis xAxis;
-        NumberAxis yAxis;
-        LineChart<Number,Number> lineChart = null;
-        XYChart.Series series;
-        
-        
-        for (int target=0; target<n_targets; target++) {
-            xAxis = new NumberAxis();
-            yAxis = new NumberAxis();
-            xAxis.labelProperty().set("Steps");
-            yAxis.labelProperty().set("Voltage");
-            lineChart = new LineChart<Number,Number>(xAxis,yAxis);
 
-            series = new XYChart.Series();
-            for (int t=0; t<V[target].length; t++) {
-                if (V != null){
-                    series.getData().add(new XYChart.Data(t, V[target][t]));
+
+            int n_targets = detector.getTargets().size();
+
+            NumberAxis xAxis;
+            NumberAxis yAxis;
+            LineChart<Number,Number> lineChart = null;
+            XYChart.Series series;
+
+
+            for (int target=0; target<n_targets; target++) {
+                xAxis = new NumberAxis();
+                yAxis = new NumberAxis();
+                xAxis.labelProperty().set("Steps");
+                yAxis.labelProperty().set("Voltage");
+                lineChart = new LineChart<Number,Number>(xAxis,yAxis);
+
+                series = new XYChart.Series();
+                for (int t=0; t<V[target].length; t++) {
+                    if (V != null){
+                        series.getData().add(new XYChart.Data(t, V[target][t]));
+                    }
                 }
-            }
-            lineChart.getData().add(series);
-            lineChart.legendVisibleProperty().set(false);
-            plotBox.getChildren().add(lineChart);
-            lineChart.setMaxHeight(70);
-            
-        }
+                lineChart.getData().add(series);
+                lineChart.legendVisibleProperty().set(false);
+                plotBox.getChildren().add(lineChart);
+                lineChart.setMaxHeight(70);
 
+            }
+
+        } else {
+            System.out.println("Null V");
+        }
             
         
         

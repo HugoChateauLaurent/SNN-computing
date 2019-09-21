@@ -42,5 +42,10 @@ public interface ICell extends IGraphNode {
     }
     
     public void delete();
+    
+    public void increaseCount();
+    public void decreaseCount();
+    public void decreaseID();
 
+    public int getID();
 }

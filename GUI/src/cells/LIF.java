@@ -22,7 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 
-public class LIF extends AbstractNode implements Connectable {
+public class LIF extends AbstractNode implements Targetable {
     
     private static int count = 1;
     
@@ -170,12 +170,20 @@ public class LIF extends AbstractNode implements Connectable {
 
     }
     
-    public static int getCount() {
-        return count;
+    public void increaseCount() {
+        count++;
+    }
+    
+    public void decreaseCount() {
+        count--;
     }
     
     public static void setCount(int newCount) {
         count = newCount;
+    }
+    
+    public static int getCount() {
+        return count;
     }
 
     

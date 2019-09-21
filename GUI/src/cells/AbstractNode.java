@@ -19,10 +19,11 @@ import javafx.scene.input.MouseEvent;
  *
  * @author ubuntu
  */
-public abstract class AbstractNode extends AbstractCell implements Connectable {
+public abstract class AbstractNode extends AbstractCell implements Detectable {
     
     protected double I = 0;
     protected double out = 0;
+    protected double V;
     
     protected double amplitude;
     protected Random rng;
@@ -55,11 +56,14 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         this.I = I;
     }
     
+    public double getV() {
+        return V;
+    }
+    
     @Override
     public ContextMenu createContextMenu(Graph graph){
-        
-        Connectable this_connectable = (Connectable) this;
-        
+        AbstractNode this_node = this;
+                
         final ContextMenu contextMenu = new ContextMenu();
         /*contextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
@@ -74,8 +78,8 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
 
         if (this instanceof LIF) {
             ID_label.setText("LIF " + Integer.toString(ID));
-        //} else if (this instanceof SpikeTrain) {
-        //    ID_label.setText("SpikeTrain " + Integer.toString(ID));
+        } else if (this instanceof InputTrain) {
+            ID_label.setText("Input Train " + Integer.toString(ID));
         } else {
             System.out.println("Unknown AbstractNode: cannot ID_label");
         }
@@ -87,8 +91,8 @@ public abstract class AbstractNode extends AbstractCell implements Connectable {
         connect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                this_connectable.updateToConnect(!this_connectable.getToConnect());
-                model.tryToConnect(this_connectable);
+                updateToConnect(!toConnect);
+                model.tryToConnect(this_node);
             }
         });
         

@@ -213,24 +213,22 @@ public class MainApp extends Application {
         });
         menu.getItems().add(item);
         
-        item = new MenuItem("Spike train");
+        item = new MenuItem("Input train");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().createSpikeTrain();
+                graph.getModel().createInputTrain();
             }
         });
-        item.setDisable(true);
         menu.getItems().add(item);
         
-        item = new MenuItem("Poisson");
+        item = new MenuItem("Random generator");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                graph.getModel().createPoisson();
+                graph.getModel().createRandomSpiker();
             }
         });
-        item.setDisable(true);
         menu.getItems().add(item);
         
         menu.getItems().add(new SeparatorMenuItem());

@@ -198,25 +198,13 @@ public class Graph {
         model.removeConnectedEdges(cell);
         model.removeCell(cell);
         
-        if (cell instanceof LIF) {
-            LIF.setCount(LIF.getCount()-1);
-        } else if (cell instanceof Multimeter) {
-            Multimeter.setCount(Multimeter.getCount()-1);
-        } else if (cell instanceof Raster) {
-            Raster.setCount(Raster.getCount()-1);
-        } 
+        
     }
     
     public void removeEdge(IEdge edge) {
         Shape edgeGraphic = getGraphic(edge);
         pannableCanvas.getChildren().remove(edgeGraphic);
         model.removeEdge(edge);
-        
-        if (edge instanceof DetectorEdge) {
-            DetectorEdge.setCount(DetectorEdge.getCount()-1);
-        } else if (edge instanceof Synapse) {
-            Synapse.setCount(Synapse.getCount()-1);
-        }
     }
     
     public void removeEdges(List<IEdge> edges) {

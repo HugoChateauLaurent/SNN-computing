@@ -1,6 +1,5 @@
 package graph;
 
-import cells.Connectable;
 import edges.IEdge;
 import cells.ICell;
 import java.io.Serializable;
@@ -10,8 +9,11 @@ import cells.AbstractCell;
 import cells.AbstractDetector;
 import cells.LIF;
 import cells.AbstractNode;
+import cells.InputTrain;
 import cells.Multimeter;
+import cells.RandomSpiker;
 import cells.Raster;
+import cells.Targetable;
 import edges.DetectorEdge;
 import edges.Synapse;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -164,47 +167,56 @@ public class Model implements Serializable {
         allEdges.add(edge);
     }
 
-    public void tryToConnect(Connectable c1) {
-        Connectable c2 = null;
-        Connectable iCell;
+    public void tryToConnect(AbstractCell c1) {
+        
+        AbstractCell c2 = null;
 
         for (final ICell cell : allCells) {
 
-            if (cell instanceof Connectable && cell != c1) {
-                iCell = (Connectable) cell;
+            if (cell != c1) {
 
-                if (iCell.getToConnect()) {
-                    c2 = iCell;
+                if (((AbstractCell) cell).getToConnect()) {
+                    c2 = (AbstractCell) cell;
                 }
             }
         }
                 
                 
-        if (c2 != null) {
+        if (c2 != null && c1.getToConnect()) {
             
             if (!(c2 instanceof AbstractDetector) && !(c1 instanceof AbstractDetector)) {
                 
-                Pair params = Synapse.askParameters();
-                if (params != null && (Integer) params.getValue() > 0) {
-                    
-                    addSynapse((ICell) c2, (ICell) c1, (double) params.getKey(), (int) params.getValue());
+                if(c1 instanceof Targetable) {
+                    Pair params = Synapse.askParameters();
+                    if (params != null && (Integer) params.getValue() > 0) {
 
-                    c2.updateToConnect(false);
-                    c1.updateToConnect(false);
+                        addSynapse((ICell) c2, (ICell) c1, (double) params.getKey(), (int) params.getValue());
 
-                } else {
-                    if ((Integer) params.getValue() <= 0) {
-                        System.out.println("Delay must be at least 1");
+                    } else {
+                        if ((Integer) params.getValue() <= 0) {
+                            System.out.println("Delay must be at least 1");
+                        }
                     }
-                    c2.updateToConnect(false);
-                    c1.updateToConnect(false);
+                    
+                } else {
+                    System.out.println("Target must be targetable (like a LIF)");
                 }
+                c2.updateToConnect(false);
+                c1.updateToConnect(false);
+                
+                
             } else if (!(c2 instanceof AbstractDetector) && c1 instanceof AbstractDetector) {
                 
-            
+                
+                
                 AbstractNode target = (AbstractNode) c2;
                 AbstractCell detector = (AbstractCell) c1;
-                addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
+                
+                if (!connectionExists(target, detector)) {
+                    addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
+                } else {
+                    System.out.println("Cannot connect node to the same detector twice");
+                }
                 
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
@@ -214,7 +226,12 @@ public class Model implements Serializable {
             
                 AbstractNode target = (AbstractNode) c1;
                 AbstractCell detector = (AbstractCell) c2;
-                addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
+                
+                if (!connectionExists(target, detector)) {
+                    addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
+                } else {
+                    System.out.println("Cannot connect node to the same detector twice");
+                }
                 
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
@@ -328,12 +345,12 @@ public class Model implements Serializable {
         graph.addCell(raster, true);
         return raster;    }
 
-    public void createPoisson() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void createSpikeTrain() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void createRandomSpiker() {
+        final Pair<Double,Double> params = RandomSpiker.askParameters();
+        if (params != null) {
+            final ICell random = new RandomSpiker(this, params.getKey(), params.getValue());
+            graph.addCell(random, true);
+        }
     }
 
     public void createLIF() {
@@ -341,6 +358,14 @@ public class Model implements Serializable {
         if (params != null) {
             final ICell lif = new LIF(this, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
             graph.addCell(lif, true);
+        }
+    }
+
+    public void createInputTrain() {
+        final Pair<double[], Boolean> params = InputTrain.askParameters();
+        if (params != null) {
+            final ICell inputTrain = new InputTrain(this, params.getKey(), params.getValue());
+            graph.addCell(inputTrain, true);
         }
     }
 
@@ -380,10 +405,29 @@ public class Model implements Serializable {
 
     void removeCell(ICell cell) {
         allCells.remove(cell);
+        
+        if (cell instanceof AbstractNode) {
+            removeFromDetectors((AbstractNode) cell);
+        }
+        
+        cell.decreaseCount();
+        for (ICell c : allCells) {
+            if (cell.getClass().equals(c.getClass()) && cell.getID()<c.getID()) {
+                c.decreaseID();
+            }
+        }
+        
+        
     }
 
     void removeEdge(IEdge edge) {
         allEdges.remove(edge);
+        edge.decreaseCount();
+        for (IEdge e : allEdges) {
+            if (edge.getClass().equals(e.getClass()) && edge.getID()<e.getID()) {
+                e.decreaseID();
+            }
+        }
     }
     
     public void removeConnectedEdges(ICell cell) {
@@ -394,5 +438,26 @@ public class Model implements Serializable {
             }
         }
         graph.removeEdges(toRemove);
+    }
+    
+    public void removeFromDetectors(AbstractNode cell) {
+        for (ICell c : allCells) {
+            if (c instanceof AbstractDetector) {
+                if (((AbstractDetector) c).getTargets().contains(cell)) {
+                    ((AbstractDetector) c).removeTarget((AbstractNode) cell);
+                }
+                
+            }
+        }
+    }
+
+    private boolean connectionExists(AbstractNode target, AbstractCell detector) {
+        for (IEdge edge : allEdges) {
+            if (edge.getSource() == target && edge.getTarget() == detector) {
+                return true;
+            }
+        }
+        return false;
+        
     }
 }

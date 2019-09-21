@@ -1,6 +1,5 @@
 package edges;
 
-import cells.Connectable;
 import cells.ICell;
 import graph.Graph;
 import graph.Model;
@@ -29,8 +28,8 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     
     protected int ID;
 
-    private final ICell source;
-    private final ICell target;
+    protected final ICell source;
+    protected final ICell target;
     private transient Shape view;
     protected Model model;
 
@@ -142,6 +141,19 @@ public abstract class AbstractEdge implements IEdge, Serializable {
             System.out.println("Editing properties");
             synapse.editProperties();
         }
+    }
+    
+    public void decreaseID() {
+        ID--;
+        System.out.println("Decrease ID to "+ID);
+        if (ID<1) {
+            System.out.println("ERROR: ID of "+this.getClass().getSimpleName()+" is "+ID);
+        }
+    }
+    
+    @Override
+    public int getID() {
+        return ID;
     }
 
 }

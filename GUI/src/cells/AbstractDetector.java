@@ -17,7 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import visualizer.AbstractVisualizer;
 
-public abstract class AbstractDetector extends AbstractCell implements Connectable {
+public abstract class AbstractDetector extends AbstractCell {
 
     List<AbstractNode> targets;    
     protected boolean toConnect;
@@ -52,8 +52,7 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
     @Override
     public ContextMenu createContextMenu(Graph graph){
         
-        final Connectable this_connectable = (Connectable) this;
-        
+        AbstractDetector this_node = this;
         final ContextMenu contextMenu = new ContextMenu();
         /*contextMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
@@ -79,8 +78,8 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         connect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                this_connectable.updateToConnect(!this_connectable.getToConnect());
-                model.tryToConnect(this_connectable);
+                updateToConnect(!toConnect);
+                model.tryToConnect(this_node);
             }
         });
         
@@ -122,4 +121,8 @@ public abstract class AbstractDetector extends AbstractCell implements Connectab
         return visualizer;
     }
 
+    public void removeTarget(AbstractNode target) {
+        targets.remove(target);
+        visualizer.visualize();
+    }
 }

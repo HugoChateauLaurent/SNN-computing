@@ -6,7 +6,6 @@
 package edges;
 
 import cells.AbstractNode;
-import cells.Connectable;
 import graph.Graph;
 import cells.ICell;
 import static cells.LIF.askParameters;
@@ -65,14 +64,6 @@ public class Synapse extends AbstractEdge {
         this.post = post;
         this.w = w;
         this.out_pre = new double[d]; // store output of the presynaptic neuron during d timesteps
-    }
-    
-    public static int getCount() {
-        return count;
-    }
-    
-    public static void setCount(int newCount) {
-        count = newCount;
     }
 
     public void step() {
@@ -197,5 +188,23 @@ public class Synapse extends AbstractEdge {
         }
         return null;
 
+    }
+    
+    @Override
+    public void increaseCount() {
+        count++;
+    }
+    
+    @Override
+    public void decreaseCount() {
+        count--;
+    }
+    
+    public static void setCount(int newCount) {
+        count = newCount;
+    }
+    
+    public static int getCount() {
+        return count;
     }
 }

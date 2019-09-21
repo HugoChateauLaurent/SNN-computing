@@ -12,5 +12,11 @@ public interface IEdge extends IGraphNode {
     public void step();
     
     public void delete();
+    
+    public void increaseCount();
+    public void decreaseCount();
+    public void decreaseID();
+    
+    public int getID();
 
 }

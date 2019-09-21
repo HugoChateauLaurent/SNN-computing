@@ -29,10 +29,9 @@ import visualizer.MultimeterVisualizer;
  * @author ubuntu
  */
 public class Multimeter extends AbstractDetector {
-    
+
     private static final long serialVersionUID = 3L;
 
-    
     private static int count = 1;
 
     private double[][] V; // [target][t]
@@ -57,10 +56,10 @@ public class Multimeter extends AbstractDetector {
     }
 
     public void step() {
-        LIF lif;
+        AbstractNode node;
         for (int i = 0; i < targets.size(); i++) {
-            lif = (LIF) targets.get(i);
-            V[i][index] = lif.getV();
+            node = (AbstractNode) targets.get(i);
+            V[i][index] = node.getV();
         }
         index++;
     }
@@ -68,13 +67,21 @@ public class Multimeter extends AbstractDetector {
     public void createVisualizer() {
         visualizer = new MultimeterVisualizer(model.getGraph().getApp(), this, false);
     }
-    
-    public static int getCount() {
-        return count;
+
+    public void increaseCount() {
+        count++;
     }
-    
+
+    public void decreaseCount() {
+        count--;
+    }
+
     public static void setCount(int newCount) {
         count = newCount;
+    }
+
+    public static int getCount() {
+        return count;
     }
 
 }

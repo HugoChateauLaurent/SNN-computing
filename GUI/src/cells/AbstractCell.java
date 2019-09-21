@@ -55,6 +55,20 @@ public abstract class AbstractCell implements ICell, Serializable {
     public void updateRng(Random rng) {
     }
     
+    
+    
+    @Override
+    public int getID() {
+        return ID;
+    }
+    
+    public void decreaseID() {
+        ID--;
+        if (ID<1) {
+            System.out.println("ERROR: ID of "+this.getClass().getSimpleName()+" is "+ID);
+        }
+    }
+    
     public abstract void createView();
 
     @Override
@@ -72,8 +86,6 @@ public abstract class AbstractCell implements ICell, Serializable {
             rectangle.widthProperty().set(35);
             rectangle.heightProperty().set(35);
         }
-
-        Connectable this_connectable = (Connectable) this;
         
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -97,10 +109,9 @@ public abstract class AbstractCell implements ICell, Serializable {
     }
     
     public void doubleClick() {
-        if (this instanceof Connectable) {
-            Connectable this_connectable = (Connectable) this;
-            this_connectable.updateToConnect(!this_connectable.getToConnect());
-            model.tryToConnect(this_connectable);
+        if (this instanceof AbstractNode || this instanceof AbstractDetector) {
+            updateToConnect(!toConnect);
+            model.tryToConnect(this);
         }            
     }
 

@@ -8,7 +8,6 @@ package edges;
 import cells.AbstractCell;
 import cells.AbstractDetector;
 import cells.AbstractNode;
-import cells.Connectable;
 import graph.Graph;
 import cells.ICell;
 import cells.LIF;
@@ -48,14 +47,6 @@ public class DetectorEdge extends AbstractEdge {
         
     }
     
-    public static int getCount() {
-        return count;
-    }
-    
-    public static void setCount(int newCount) {
-        count = newCount;
-    }
-    
     @Override
     public ContextMenu createContextMenu(Graph graph){
                 
@@ -72,6 +63,7 @@ public class DetectorEdge extends AbstractEdge {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Delete");
+                ((AbstractDetector) target).removeTarget((AbstractNode) source);
                 delete();
             }
         });        
@@ -80,5 +72,24 @@ public class DetectorEdge extends AbstractEdge {
         
         return contextMenu;
         
+    }
+    
+    @Override
+    public void increaseCount() {
+        count++;
+    }
+    
+    @Override
+    public void decreaseCount() {
+        count--;
+        System.out.println("Decrease count to "+count);
+    }
+    
+    public static void setCount(int newCount) {
+        count = newCount;
+    }
+    
+    public static int getCount() {
+        return count;
     }
 }
