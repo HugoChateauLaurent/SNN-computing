@@ -35,7 +35,7 @@ public class LIF extends AbstractNode implements Targetable {
     protected double V;
     protected double V_init;
     protected double V_reset;
-    protected double V_rest;
+    protected double V_min;
     protected double thr;
     protected double I_e;
     protected double noise;
@@ -44,14 +44,14 @@ public class LIF extends AbstractNode implements Targetable {
     protected boolean record_V;
     protected boolean record_spikes;
 
-    public LIF(Model model, double m, double V_init, double V_reset, double V_rest, double thr, double amplitude, double I_e, double noise) {
+    public LIF(Model model, double m, double V_init, double V_reset, double V_min, double thr, double amplitude, double I_e, double noise) {
         super(amplitude, count, model);
         count++;
         
         this.m = m;
         this.V_init = V_init;
         this.V_reset = V_reset;
-        this.V_rest = V_rest;
+        this.V_min = V_min;
         this.thr = thr;
         this.I_e = I_e;
         this.noise = noise;
@@ -76,8 +76,8 @@ public class LIF extends AbstractNode implements Targetable {
     
     public void step() {
         this.V = this.V * this.m + this.I + this.rng.nextGaussian() * this.noise; // update V
-        if (V < V_rest) {
-            V = V_rest;
+        if (V < V_min) {
+            V = V_min;
         }
         this.I = this.I_e; // reset I with I_e
         if (this.V >= this.thr) { // check for spike
@@ -94,13 +94,13 @@ public class LIF extends AbstractNode implements Targetable {
     
     public void editProperties() {
         final Double[] params = askParameters(this.m, this.V_init, this.V_reset, 
-                this.V_rest, this.thr, this.amplitude, this.I_e, this.noise);
+                this.V_min, this.thr, this.amplitude, this.I_e, this.noise);
         if (params != null) {
             this.m = params[0];
             this.V_init = params[1];
             init();
             this.V_reset = params[2];
-            this.V_rest = params[3];
+            this.V_min = params[3];
             this.thr = params[4];
             this.amplitude = params[5];
             this.I_e = params[6];
@@ -112,7 +112,7 @@ public class LIF extends AbstractNode implements Targetable {
         return askParameters(.9, 0, 0, 0, 1, 1, 0, 0); //default values
     }
 
-    public static Double[] askParameters(double m, double V_init, double V_reset, double V_rest, double thr, double amplitude, double I_e, double noise) {
+    public static Double[] askParameters(double m, double V_init, double V_reset, double V_min, double thr, double amplitude, double I_e, double noise) {
         // Create the custom dialog.
         Dialog<Double[]> dialog = new Dialog<>();
         dialog.setTitle("LIF parameters");
@@ -126,8 +126,8 @@ public class LIF extends AbstractNode implements Targetable {
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(20, 150, 10, 10));
 
-        String[] params_labels = {"Leakage constant", "V_init", "V_reset", "V_rest", "thr", "amplitude", "I_e", "noise"};
-        double[] values = {m, V_init, V_reset, V_rest, thr, amplitude, I_e, noise};
+        String[] params_labels = {"Leakage constant", "Initial voltage", "Reset voltage", "Minimum voltage", "Threshold", "Amplitude", "Bias current", "Noise"};
+        double[] values = {m, V_init, V_reset, V_min, thr, amplitude, I_e, noise};
         List<TextField> fields = new LinkedList();
 
         TextField text;
