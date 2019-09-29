@@ -61,6 +61,27 @@ public class InputTrain extends AbstractNode {
         view = new Ellipse(50, 50);
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(arrayToString(train)+", ");
+        sb.append(Boolean.toString(loop)+")");
+        
+        return sb.toString();
+    }
+    
+    public static String arrayToString(double[] array) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i=0; i<array.length; i++) {
+            sb.append(array[i]+",");
+        }
+        sb.append("]");
+        
+        return sb.toString();
+    }
+    
     
     @Override
     public void init() {

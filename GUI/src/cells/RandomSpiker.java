@@ -62,6 +62,16 @@ public class RandomSpiker extends AbstractNode {
         
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(Double.toString(p)+", ");
+        sb.append(Double.toString(amplitude)+")");
+        
+        return sb.toString();
+    }
+    
     public void step() {
         V = 0;
         if (rng.nextDouble()<p) {

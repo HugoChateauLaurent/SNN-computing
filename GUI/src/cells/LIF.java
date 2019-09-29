@@ -67,6 +67,21 @@ public class LIF extends AbstractNode implements Targetable {
         view = new Ellipse(50, 50);
     }
     
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(Double.toString(m)+", ");
+        sb.append(Double.toString(V_init)+", ");
+        sb.append(Double.toString(V_reset)+", ");
+        sb.append(Double.toString(V_min)+", ");
+        sb.append(Double.toString(thr)+", ");
+        sb.append(Double.toString(amplitude)+", ");
+        sb.append(Double.toString(I_e)+", ");
+        sb.append(Double.toString(noise)+")");
+        
+        return sb.toString();
+    }
     
     @Override
     public void init() {

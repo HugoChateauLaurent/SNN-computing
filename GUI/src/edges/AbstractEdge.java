@@ -51,6 +51,14 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     public void createView() {
         view = new Line();
     }
+    
+    public String getClassAndID(boolean underscore) {
+        if (underscore) {
+            return getClass().getSimpleName()+"_"+Integer.toString(ID);
+        } else {
+            return getClass().getSimpleName()+" "+Integer.toString(ID);
+        }
+    }
 
     @Override
     public ICell getSource() {

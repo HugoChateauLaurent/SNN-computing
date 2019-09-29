@@ -84,6 +84,20 @@ public class Synapse extends AbstractEdge {
     }
     
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        
+        sb.append(pre.getClassAndID(true)+", ");
+        sb.append(post.getClassAndID(true)+", ");
+        
+        sb.append(Double.toString(w)+", ");
+        sb.append(Integer.toString(out_pre.length)+")");
+        
+        return sb.toString();
+    }
+    
+    @Override
     public ContextMenu createContextMenu(Graph graph){
                 
         final ContextMenu contextMenu = new ContextMenu();

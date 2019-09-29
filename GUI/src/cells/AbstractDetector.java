@@ -32,7 +32,6 @@ public abstract class AbstractDetector extends AbstractCell {
     }
     
     
-    
     public void createView() {
         this.view = new Rectangle(100, 100);
     }
@@ -47,6 +46,25 @@ public abstract class AbstractDetector extends AbstractCell {
     
     public void setVisualizer(AbstractVisualizer visualizer) {
         this.visualizer = visualizer;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"([");
+        
+        boolean start = true;
+        for (AbstractNode node : targets) {
+            if (!start) {
+                sb.append(", ");
+            } else {
+                start = false;
+            }
+            sb.append(node.getClassAndID(true));
+        }
+        sb.append("])");
+        
+        return sb.toString();
     }
         
     @Override

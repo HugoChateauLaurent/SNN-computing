@@ -55,7 +55,13 @@ public abstract class AbstractCell implements ICell, Serializable {
     public void updateRng(Random rng) {
     }
     
-    
+    public String getClassAndID(boolean underscore) {
+        if (underscore) {
+            return getClass().getSimpleName()+"_"+Integer.toString(ID);
+        } else {
+            return getClass().getSimpleName()+" "+Integer.toString(ID);
+        }
+    }
     
     @Override
     public int getID() {

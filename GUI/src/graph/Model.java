@@ -64,7 +64,7 @@ public class Model implements Serializable {
     public void setGraph(Graph graph) {
         this.graph = graph;
     }
-    
+
     public Graph getGraph() {
         return graph;
     }
@@ -133,7 +133,7 @@ public class Model implements Serializable {
     public ObservableList<ICell> getAllCells() {
         return allCells;
     }
-    
+
     public ObservableList<AbstractDetector> getAllDetectors() {
         ObservableList<AbstractDetector> detectors = FXCollections.observableArrayList();
         for (ICell cell : allCells) {
@@ -141,12 +141,34 @@ public class Model implements Serializable {
                 detectors.add((AbstractDetector) cell);
             }
         }
-        
+
         return detectors;
+    }
+
+    public ObservableList<AbstractNode> getAllNodes() {
+        ObservableList<AbstractNode> nodes = FXCollections.observableArrayList();
+        for (ICell cell : allCells) {
+            if (cell instanceof AbstractNode) {
+                nodes.add((AbstractNode) cell);
+            }
+        }
+
+        return nodes;
     }
 
     public ObservableList<IEdge> getAllEdges() {
         return allEdges;
+    }
+    
+    public ObservableList<Synapse> getAllSynapses() {
+        ObservableList<Synapse> synapses = FXCollections.observableArrayList();
+        for (IEdge edge : allEdges) {
+            if (edge instanceof Synapse) {
+                synapses.add((Synapse) edge);
+            }
+        }
+
+        return synapses;
     }
 
     public void addCell(ICell cell) {
@@ -157,7 +179,7 @@ public class Model implements Serializable {
         final Synapse connection = new Synapse(graph.getModel(), (AbstractNode) pre, (AbstractNode) post, w, d);
         graph.addEdge((IEdge) connection, true, true);
     }
-    
+
     public void addDetectorEdge(AbstractNode target, AbstractDetector detector) {
         final DetectorEdge connection = new DetectorEdge(graph.getModel(), (AbstractNode) target, detector);
         graph.addEdge((IEdge) connection, true, true);
@@ -168,7 +190,7 @@ public class Model implements Serializable {
     }
 
     public void tryToConnect(AbstractCell c1) {
-        
+
         AbstractCell c2 = null;
 
         for (final ICell cell : allCells) {
@@ -180,13 +202,12 @@ public class Model implements Serializable {
                 }
             }
         }
-                
-                
+
         if (c2 != null && c1.getToConnect()) {
-            
+
             if (!(c2 instanceof AbstractDetector) && !(c1 instanceof AbstractDetector)) {
-                
-                if(c1 instanceof Targetable) {
+
+                if (c1 instanceof Targetable) {
                     Pair params = Synapse.askParameters();
                     if (params != null && (Integer) params.getValue() > 0) {
 
@@ -197,45 +218,41 @@ public class Model implements Serializable {
                             System.out.println("Delay must be at least 1");
                         }
                     }
-                    
+
                 } else {
                     System.out.println("Target must be targetable (like a LIF)");
                 }
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
-                
-                
+
             } else if (!(c2 instanceof AbstractDetector) && c1 instanceof AbstractDetector) {
-                
-                
-                
+
                 AbstractNode target = (AbstractNode) c2;
                 AbstractCell detector = (AbstractCell) c1;
-                
+
                 if (!connectionExists(target, detector)) {
                     addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 } else {
                     System.out.println("Cannot connect node to the same detector twice");
                 }
-                
+
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
-                
+
             } else if (!(c1 instanceof AbstractDetector) && c2 instanceof AbstractDetector) {
-                
-            
+
                 AbstractNode target = (AbstractNode) c1;
                 AbstractCell detector = (AbstractCell) c2;
-                
+
                 if (!connectionExists(target, detector)) {
                     addDetectorEdge((AbstractNode) target, (AbstractDetector) detector);
                 } else {
                     System.out.println("Cannot connect node to the same detector twice");
                 }
-                
+
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
-                
+
             } else if (c1 instanceof AbstractDetector && c2 instanceof AbstractDetector) {
                 System.out.println("Cannot connect two detectors");
                 c1.updateToConnect(false);
@@ -262,7 +279,7 @@ public class Model implements Serializable {
         }
         updateVisualizers();
     }
-    
+
     public void updateVisualizers() {
         for (AbstractDetector detector : getAllDetectors()) {
             detector.getVisualizer().visualize();
@@ -343,10 +360,11 @@ public class Model implements Serializable {
         final Raster raster = new Raster(this);
         raster.createVisualizer();
         graph.addCell(raster, true);
-        return raster;    }
+        return raster;
+    }
 
     public void createRandomSpiker() {
-        final Pair<Double,Double> params = RandomSpiker.askParameters();
+        final Pair<Double, Double> params = RandomSpiker.askParameters();
         if (params != null) {
             final ICell random = new RandomSpiker(this, params.getKey(), params.getValue());
             graph.addCell(random, true);
@@ -381,22 +399,22 @@ public class Model implements Serializable {
             cell.init();
         }
     }
-    
+
     private void readObject(ObjectInputStream aInputStream)
-    throws ClassNotFoundException, IOException {
+            throws ClassNotFoundException, IOException {
         aInputStream.defaultReadObject();
         allCells = FXCollections.observableArrayList(allCellsSerialization);
         allEdges = FXCollections.observableArrayList(allEdgesSerialization);
-    
+
     }
 
     private void writeObject(ObjectOutputStream aOutputStream)
-        throws IOException {
-            allCellsSerialization = new ArrayList<ICell>(allCells);
-            allEdgesSerialization = new ArrayList<IEdge>(allEdges);
-            aOutputStream.defaultWriteObject();
+            throws IOException {
+        allCellsSerialization = new ArrayList<ICell>(allCells);
+        allEdgesSerialization = new ArrayList<IEdge>(allEdges);
+        aOutputStream.defaultWriteObject();
     }
-    
+
     public void createVisualizers() {
         for (AbstractDetector detector : getAllDetectors()) {
             detector.createVisualizer();
@@ -405,31 +423,30 @@ public class Model implements Serializable {
 
     void removeCell(ICell cell) {
         allCells.remove(cell);
-        
+
         if (cell instanceof AbstractNode) {
             removeFromDetectors((AbstractNode) cell);
         }
-        
+
         cell.decreaseCount();
         for (ICell c : allCells) {
-            if (cell.getClass().equals(c.getClass()) && cell.getID()<c.getID()) {
+            if (cell.getClass().equals(c.getClass()) && cell.getID() < c.getID()) {
                 c.decreaseID();
             }
         }
-        
-        
+
     }
 
     void removeEdge(IEdge edge) {
         allEdges.remove(edge);
         edge.decreaseCount();
         for (IEdge e : allEdges) {
-            if (edge.getClass().equals(e.getClass()) && edge.getID()<e.getID()) {
+            if (edge.getClass().equals(e.getClass()) && edge.getID() < e.getID()) {
                 e.decreaseID();
             }
         }
     }
-    
+
     public void removeConnectedEdges(ICell cell) {
         ArrayList<IEdge> toRemove = new ArrayList();
         for (IEdge edge : allEdges) {
@@ -439,14 +456,14 @@ public class Model implements Serializable {
         }
         graph.removeEdges(toRemove);
     }
-    
+
     public void removeFromDetectors(AbstractNode cell) {
         for (ICell c : allCells) {
             if (c instanceof AbstractDetector) {
                 if (((AbstractDetector) c).getTargets().contains(cell)) {
                     ((AbstractDetector) c).removeTarget((AbstractNode) cell);
                 }
-                
+
             }
         }
     }
@@ -458,6 +475,72 @@ public class Model implements Serializable {
             }
         }
         return false;
+
+    }
+
+    public String to_inet() {
+        StringBuilder elements = new StringBuilder();
         
+        
+        //nodes
+        for (AbstractNode node : getAllNodes()) {
+            elements.append(node.toString());
+            elements.append("\n");
+        }
+
+        elements.append("\n\n");
+        //detectors
+        for (AbstractDetector detector : getAllDetectors()) {
+            elements.append(detector.toString());
+            elements.append("\n");
+        }
+
+        elements.append("\n\n");
+        //synapses
+        for (Synapse synapse : getAllSynapses()) {
+            elements.append(synapse.toString());
+            elements.append("\n");
+        }
+
+        elements.append("\n\n");
+        
+        elements.append("inet['network'] = Network([");
+        boolean start = true;
+        for (AbstractNode node : getAllNodes()) {
+            if (!start) {
+                elements.append(", ");
+            } else {
+                start = false;
+            }
+            
+            elements.append(node.getClassAndID(true));
+        }
+        
+        elements.append("], [");
+        start = true;
+        for (Synapse synapse : getAllSynapses()) {
+            if (!start) {
+                elements.append(", ");
+            } else {
+                start = false;
+            }
+            
+            elements.append(synapse.getClassAndID(true));
+        }
+        
+        elements.append("])\ninet['simulator'] = Simulator(inet['network'], [");
+        start = true;
+        for (AbstractDetector detector : getAllDetectors()) {
+            if (!start) {
+                elements.append(", ");
+            } else {
+                start = false;
+            }
+            
+            elements.append(detector.getClassAndID(true));
+        }
+        elements.append("])");
+        
+        return elements.toString();
     }
 }

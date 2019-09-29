@@ -50,6 +50,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import serialization.Serialization;
 import visualizer.AbstractVisualizer;
 import visualizer.MultimeterVisualizer;
@@ -58,8 +59,9 @@ public class MainApp extends Application {
 
     private Graph graph = new Graph(this);
     
-    private static String EXTENSION_NAME = ".net";
-    private static FileChooser.ExtensionFilter EXTENSION = new FileChooser.ExtensionFilter("Network files (*"+EXTENSION_NAME+".net)", "*"+EXTENSION_NAME);
+    private static Pair<String,String> EXTENSION_NAMES = new Pair(".net", ".inet");
+    private static FileChooser.ExtensionFilter EXTENSION_net = new FileChooser.ExtensionFilter("GUI files (*"+EXTENSION_NAMES.getKey()+")","*"+EXTENSION_NAMES.getKey());
+    private static FileChooser.ExtensionFilter EXTENSION_inet = new FileChooser.ExtensionFilter("Simulator-independent files (*"+EXTENSION_NAMES.getValue()+")","*"+EXTENSION_NAMES.getValue());
     private static File NETWORKS_DIRECTORY = new File("./networks");
     private static File DEFAULT_FILE = new File(NETWORKS_DIRECTORY+"/default.net");
     
@@ -182,7 +184,7 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
-        menuBar.getMenus().add(menu);
+        
         
         item = new MenuItem("Save as");
         item.setOnAction(new EventHandler<ActionEvent>() {
@@ -196,6 +198,8 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
+        
+        menuBar.getMenus().add(menu);
         
         menu = new Menu("Create");
         
@@ -347,18 +351,19 @@ public class MainApp extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(NETWORKS_DIRECTORY);
         fileChooser.setInitialFileName("my_network.net");
-        fileChooser.getExtensionFilters().add(EXTENSION);
+        fileChooser.getExtensionFilters().add(EXTENSION_net);
+        fileChooser.getExtensionFilters().add(EXTENSION_inet);
 
         //Show save file dialog
         File newSaveFile = fileChooser.showSaveDialog(stage);
-        if (newSaveFile != null && newSaveFile.getName().endsWith(EXTENSION_NAME) && !newSaveFile.getName().equals(DEFAULT_FILE.getName())) {
+        if (newSaveFile != null && (newSaveFile.getName().endsWith(EXTENSION_NAMES.getKey()) || newSaveFile.getName().endsWith(EXTENSION_NAMES.getValue())) && !newSaveFile.getName().equals(DEFAULT_FILE.getName())) {
             saveFile = newSaveFile;
             updateTitle();
             return true;
         } else if (newSaveFile.getName().equals(DEFAULT_FILE.getName())) {		
                 System.out.println("Cannot override default file");		
-        } else if (!newSaveFile.getName().endsWith(EXTENSION_NAME)) {
-            System.out.println("Wrong file extension. File name must be *" + EXTENSION_NAME);
+        } else if (!(newSaveFile.getName().endsWith(EXTENSION_NAMES.getKey()) || newSaveFile.getName().endsWith(EXTENSION_NAMES.getValue()))) {
+            System.out.println("Wrong file extension. File name must be *" + EXTENSION_NAMES.getKey()+" or *"+ EXTENSION_NAMES.getValue());
         } else {
             System.out.println("Cannot save as: " + newSaveFile);
         }
@@ -369,11 +374,19 @@ public class MainApp extends Application {
     private void save() {
         try {
             System.out.println("Save: "+saveFile.getName());
-            FileOutputStream fileOut = new FileOutputStream(saveFile);
-            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
-            Serialization serialization = new Serialization(graph.getModel());
-            objectOut.writeObject(serialization);
-            objectOut.close();
+            
+            if (saveFile.getName().endsWith(EXTENSION_NAMES.getKey())) {
+                FileOutputStream fileOut = new FileOutputStream(saveFile);
+                ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+                Serialization serialization = new Serialization(graph.getModel());
+                objectOut.writeObject(serialization);
+                objectOut.close();
+            } else {
+                PrintWriter out = new PrintWriter(saveFile);
+                out.println(graph.getModel().to_inet());
+                out.close();
+            }
+            
             System.out.println("The Object was succesfully written to a file");
  
         } catch (Exception ex) {
@@ -417,7 +430,8 @@ public class MainApp extends Application {
         try {
             
             FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(EXTENSION);
+            fileChooser.getExtensionFilters().add(EXTENSION_net);
+            fileChooser.getExtensionFilters().add(EXTENSION_inet);
             fileChooser.setInitialDirectory(NETWORKS_DIRECTORY);
             fileChooser.setInitialFileName("default.net");
             
