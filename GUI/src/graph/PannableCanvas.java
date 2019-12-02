@@ -8,6 +8,8 @@ import javafx.scene.layout.Pane;
 public class PannableCanvas extends Pane implements Serializable {
 
 	private final DoubleProperty scaleProperty;
+        
+        private static final long serialVersionUID = 17L;
 
 	public PannableCanvas() {
 		this(new SimpleDoubleProperty(1.0));

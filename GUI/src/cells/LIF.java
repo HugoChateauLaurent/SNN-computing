@@ -2,6 +2,7 @@ package cells;
 
 import graph.Graph;
 import graph.Model;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,7 +27,7 @@ public class LIF extends AbstractNode implements Targetable {
     
     private static int count = 1;
     
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 7L;
     
     private boolean toConnect = false;
     
@@ -65,12 +66,13 @@ public class LIF extends AbstractNode implements Targetable {
     
     public void createView() {
         view = new Ellipse(50, 50);
+        cellGestures = new CellGestures(model.getGraph(), this);
+        cellGestures.makeDraggable();
     }
     
-    @Override
-    public String toString() {
+    public String to_inet() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = network.create"+getClass().getSimpleName()+"(");
         sb.append(Double.toString(m)+", ");
         sb.append(Double.toString(V_init)+", ");
         sb.append(Double.toString(V_reset)+", ");
@@ -198,6 +200,10 @@ public class LIF extends AbstractNode implements Targetable {
     }
     
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
 

@@ -13,12 +13,12 @@ class AbstractNeuron():
 	out : float (Default: 0)
 		Current neuron output
 	"""
-	I = 0
-	out = 0
-	V = 0
 
 	def __init__(self, amplitude=1):
 		self.amplitude = amplitude
+		self.I = 0
+		self.out = 0
+		self.V = 0
 
 	def update_rng(self, rng):
 		if hasattr(self, 'rng'):
@@ -49,7 +49,9 @@ class LIF(AbstractNeuron):
 		Random generator for the noise
 	"""
 
-	def __init__(self, m, V_init=0, V_reset=0, V_min=0, thr=1, amplitude=1, I_e=0, noise=0, rng=None):
+	count = 0
+
+	def __init__(self, m, V_init=0, V_reset=0, V_min=0, thr=1, amplitude=1, I_e=0, noise=0, rng=None, ID=None, increment_count=True):
 		AbstractNeuron.__init__(self, amplitude)
 		self.m = m
 		self.V = V_init
@@ -59,6 +61,13 @@ class LIF(AbstractNeuron):
 		self.I_e = I_e
 		self.rng = rng if rng != None else np.random.RandomState()
 		self.noise = noise
+		
+		if ID is None:
+			self.ID = LIF.count + 1
+		else:
+			self.ID = ID
+		if increment_count:
+			LIF.count += 1
 		
 
 	def step(self):
@@ -72,6 +81,19 @@ class LIF(AbstractNeuron):
 			self.out = self.amplitude
 		else:
 			self.out = 0
+
+	def to_inet_string(self):
+		return self.__class__.__name__+'_'+str(self.ID)+' = ' \
+					'network.create'+self.__class__.__name__+'('+ \
+					str(self.m)+', '+ \
+					str(self.V)+', '+ \
+					str(self.V_reset)+', '+ \
+					str(self.V_min)+', '+ \
+					str(self.thr)+', '+ \
+					str(self.amplitude)+', '+ \
+					str(self.I_e)+', '+ \
+					str(self.noise) \
+				+')'
 
 
 
@@ -88,12 +110,23 @@ class InputTrain(AbstractNeuron):
 	loop : boolean
 		If true, the train will be looped. Otherwise, the output is 0 at the end of the train.
 	"""
-	def __init__(self, train, loop):
+
+	count = 0
+
+	def __init__(self, train, loop, ID=None, increment_count=True):
 		AbstractNeuron.__init__(self, 1)
 		self.train = train
 		self.loop = loop
 		self.size = len(train)
 		self.index = 0
+		
+		if ID is None:
+			self.ID = InputTrain.count + 1
+		else:
+			self.ID = ID
+		if increment_count:
+			InputTrain.count += 1
+
 
 	def step(self):
 		if self.index >= self.size:
@@ -109,7 +142,14 @@ class InputTrain(AbstractNeuron):
 		self.out = self.V
 		self.index += 1
 
-class PoissonGenerator(AbstractNeuron):
+	def to_inet_string(self):
+		return self.__class__.__name__+'_'+str(self.ID)+' = ' \
+					'network.create'+self.__class__.__name__+'('+ \
+					str(self.train)+', '+ \
+					str(self.loop) \
+				+')'
+
+'''class PoissonGenerator(AbstractNeuron):
 	"""Generator that fires with Poisson statistics, i.e. exponentially 
 	distributed interspike intervals.
 
@@ -136,6 +176,9 @@ class PoissonGenerator(AbstractNeuron):
 			
 		self.out = self.V * self.amplitude
 		self.I = self.I_e
+'''
+
+	
 
 class RandomSpiker(AbstractNeuron):
 	"""Generator that fires with a given probability at each time step
@@ -150,10 +193,19 @@ class RandomSpiker(AbstractNeuron):
 		Random generator
 	"""
 
-	def __init__(self, p, amplitude=1, rng=None):
+	count = 0
+
+	def __init__(self, p, amplitude=1, rng=None, ID=None, increment_count=True):
 		AbstractNeuron.__init__(self, amplitude)
 		self.p = p
 		self.rng = rng if rng != None else np.random.RandomState()
+
+		if ID is None:
+			self.ID = RandomSpiker.count + 1
+		else:
+			self.ID = ID
+		if increment_count:
+			RandomSpiker.count += 1
 
 	def step(self):
 		self.V = 0
@@ -161,4 +213,11 @@ class RandomSpiker(AbstractNeuron):
 			self.V = self.amplitude
 			
 		self.out = self.V
+
+	def to_inet_string(self):
+		return self.__class__.__name__+'_'+str(self.ID)+' = ' \
+					'network.create'+self.__class__.__name__+'('+ \
+					str(self.p)+', '+ \
+					str(self.amplitude) \
+				+')'
 

@@ -1,0 +1,8 @@
+inet['network'] = Network()
+inet['simulator'] = Simulator(network)
+network = inet['network']
+simulator = inet['simulator']
+
+
+LIF_1 = network.createLIF(0.9, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0)
+

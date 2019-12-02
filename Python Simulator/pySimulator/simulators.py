@@ -1,4 +1,5 @@
 import numpy as np
+from .detectors import *
 
 class Simulator():
 	"""Simulator
@@ -16,6 +17,18 @@ class Simulator():
 		self.detectors = detectors
 		if seed != None:
 			self.network.update_rng(np.random.RandomState(seed))
+			
+
+	def createMultimeter(self, targets=[], ID=None, increment_count=True):
+		detector = Multimeter(targets, ID, increment_count)
+		self.detectors.append(detector)
+		return detector
+
+	def createRaster(self, targets=[], ID=None, increment_count=True):
+		detector = Raster(targets, ID, increment_count)
+		self.detectors.append(detector)
+		return detector
+		
 
 	def run(self, steps):
 		"""Run the simulator
@@ -30,12 +43,20 @@ class Simulator():
 		# steps = int(np.round(float(seconds) / self.dt))
 
 		for detector in self.detectors:
-			detector.init(steps)
+			detector.initialize(steps)
 
 		for i in range(steps):
 			self.network.step()
 
 			for detector in self.detectors:
 				detector.step()
+
+	def to_inet_string(self):
+		inet_str = ''
+
+		for d in self.detectors:
+			inet_str += d.to_inet_string() + '\n\n'
+
+		return inet_str
 
 

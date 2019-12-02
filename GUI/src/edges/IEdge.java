@@ -2,6 +2,8 @@ package edges;
 
 import cells.ICell;
 import graph.IGraphNode;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public interface IEdge extends IGraphNode {
 
@@ -18,5 +20,6 @@ public interface IEdge extends IGraphNode {
     public void decreaseID();
     
     public int getID();
-
+    
+    public void createView();
 }

@@ -10,6 +10,7 @@ import cells.AbstractNode;
 import graph.Graph;
 import graph.MainApp;
 import graph.Model;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +27,7 @@ public class Raster extends AbstractDetector {
 
     private static int count = 1;
     
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 11L;
 
     
     private boolean[][] spikes; // [target][t]
@@ -77,6 +78,10 @@ public class Raster extends AbstractDetector {
     }
     
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
     

@@ -6,3 +6,4 @@ from .nodes import *
 from .connections import *
 from .detectors import *
 from .networks import *
+from .inet_interface import *

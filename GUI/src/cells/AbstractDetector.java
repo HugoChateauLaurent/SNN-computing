@@ -22,6 +22,8 @@ public abstract class AbstractDetector extends AbstractCell {
     List<AbstractNode> targets;    
     protected boolean toConnect;
     protected transient AbstractVisualizer visualizer;
+    
+    private static final long serialVersionUID = 2L;
 
     
     public AbstractDetector(List<AbstractNode> targets, int ID, Model model) {
@@ -34,6 +36,8 @@ public abstract class AbstractDetector extends AbstractCell {
     
     public void createView() {
         this.view = new Rectangle(100, 100);
+        cellGestures = new CellGestures(model.getGraph(), this);
+        cellGestures.makeDraggable();
     }
     
     public List<AbstractNode> getTargets() {
@@ -48,21 +52,14 @@ public abstract class AbstractDetector extends AbstractCell {
         this.visualizer = visualizer;
     }
     
-    @Override
-    public String toString() {
+    public String to_inet() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"([");
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = network.create"+getClass().getSimpleName()+"()");
         
-        boolean start = true;
         for (AbstractNode node : targets) {
-            if (!start) {
-                sb.append(", ");
-            } else {
-                start = false;
-            }
-            sb.append(node.getClassAndID(true));
+            sb.append(getClass().getSimpleName()+"_"+ID+".addTarget("+node.getClassAndID(true)+")\n");
         }
-        sb.append("])");
+        sb.append("\n");
         
         return sb.toString();
     }
@@ -85,9 +82,9 @@ public abstract class AbstractDetector extends AbstractCell {
         ID_label.getStyleClass().add("context-menu-title");
         
         if (this instanceof Multimeter) {
-            ID_label.setText("Multimeter " + Integer.toString(ID));
+            ID_label.setText("Multimeter " + Integer.toString(ID)+" z"+zLevel);
         } else if (this instanceof Raster) {
-            ID_label.setText("Raster " + Integer.toString(ID));
+            ID_label.setText("Raster " + Integer.toString(ID)+" z"+zLevel);
         } else {
             System.out.println("Unknown AbstractDetector: cannot ID_label");
         }
@@ -141,6 +138,12 @@ public abstract class AbstractDetector extends AbstractCell {
 
     public void removeTarget(AbstractNode target) {
         targets.remove(target);
-        visualizer.visualize();
+        tryVisu();
+    }
+    
+    public void tryVisu() {
+        if (visualizer != null) {
+            visualizer.visualize();
+        }
     }
 }

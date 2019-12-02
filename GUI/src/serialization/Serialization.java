@@ -7,6 +7,7 @@ package serialization;
 
 import cells.InputTrain;
 import cells.LIF;
+import cells.Module;
 import cells.Multimeter;
 import cells.RandomSpiker;
 import cells.Raster;
@@ -29,6 +30,8 @@ public class Serialization implements Serializable {
     private Model model;
     private Map<String, Integer> counts;
     
+    private static final long serialVersionUID = 19L;
+    
     public Serialization(Model model) {
         this.model = model;
         counts = new HashMap<String, Integer>();
@@ -44,6 +47,7 @@ public class Serialization implements Serializable {
         Multimeter.setCount(counts.get("Multimeter"));
         RandomSpiker.setCount(counts.get("Random"));
         InputTrain.setCount(counts.get("InputTrain"));
+        Module.setCount(counts.get("Module"));
         
         DetectorEdge.setCount(counts.get("DetectorEdge"));
         Synapse.setCount(counts.get("Synapse"));
@@ -56,15 +60,10 @@ public class Serialization implements Serializable {
         counts.put("Multimeter", Multimeter.getCount());
         counts.put("Random", RandomSpiker.getCount());
         counts.put("InputTrain", InputTrain.getCount());
+        counts.put("Module", Module.getCount());
         
         counts.put("DetectorEdge", DetectorEdge.getCount());
         counts.put("Synapse", Synapse.getCount());
-    }
-    
-    private void readObject(ObjectInputStream aInputStream)
-    throws ClassNotFoundException, IOException {
-        aInputStream.defaultReadObject();
-        readCounts();
     }
 
     private void writeObject(ObjectOutputStream aOutputStream)

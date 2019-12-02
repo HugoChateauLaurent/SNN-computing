@@ -48,7 +48,7 @@ import javafx.util.Pair;
 public class Synapse extends AbstractEdge {
     
     private static int count = 1;
-    private static final long serialVersionUID = 6L;
+    private static final long serialVersionUID = 14L;
 
     protected AbstractNode pre;
     protected AbstractNode post;
@@ -83,10 +83,9 @@ public class Synapse extends AbstractEdge {
         }
     }
     
-    @Override
-    public String toString() {
+    public String to_inet() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = network.create"+getClass().getSimpleName()+"(");
         
         sb.append(pre.getClassAndID(true)+", ");
         sb.append(post.getClassAndID(true)+", ");
@@ -219,6 +218,10 @@ public class Synapse extends AbstractEdge {
     }
     
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
 }

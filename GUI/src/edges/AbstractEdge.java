@@ -24,7 +24,7 @@ import javafx.scene.shape.Shape;
 
 public abstract class AbstractEdge implements IEdge, Serializable {
     
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 12;
     
     protected int ID;
 
@@ -48,8 +48,31 @@ public abstract class AbstractEdge implements IEdge, Serializable {
         }
     }
     
+    public Shape getView() {
+        return view;
+    }
+    
+    public Model getModel() {
+        return model;
+    }
+    
+    public void setModel(Model newModel) {
+        model = newModel;
+    }
+    
+    public abstract int getClassCount();
+    
+    public void setID(int newID) {
+        ID = newID;
+    }
+    
+    @Override
     public void createView() {
         view = new Line();
+    }
+    
+    public int getZLevel(){
+        return Math.max(source.getZLevel(), target.getZLevel());
     }
     
     public String getClassAndID(boolean underscore) {
@@ -103,15 +126,17 @@ public abstract class AbstractEdge implements IEdge, Serializable {
         view.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton().equals(MouseButton.SECONDARY)) {
-                    ContextMenu contextMenu = createContextMenu(graph);
-                    contextMenu.setAutoHide(true);
-                    contextMenu.show(view, event.getScreenX(), event.getScreenY());
-                    event.consume();
-                } else if(event.getButton().equals(MouseButton.PRIMARY)){
-                    if(event.getClickCount() == 2){
-                        doubleClick();
+                if (!event.isConsumed()) {
+                    if (event.getButton().equals(MouseButton.SECONDARY)) {
+                        ContextMenu contextMenu = createContextMenu(graph);
+                        contextMenu.setAutoHide(true);
+                        contextMenu.show(view, event.getScreenX(), event.getScreenY());
+                    } else if(event.getButton().equals(MouseButton.PRIMARY)){
+                        if(event.getClickCount() == 2){
+                            doubleClick();
+                        }
                     }
+                    event.consume();
                 }
             }
         });
@@ -134,13 +159,6 @@ public abstract class AbstractEdge implements IEdge, Serializable {
     
     public void delete() {
         model.getGraph().removeEdge(this);
-    }
-    
-    private void readObject(ObjectInputStream aInputStream)
-    throws ClassNotFoundException, IOException {
-          aInputStream.defaultReadObject();
-          createView();
-    
     }
     
     public void doubleClick() {

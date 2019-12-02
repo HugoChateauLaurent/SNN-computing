@@ -4,23 +4,31 @@ import cells.AbstractCell;
 import edges.IEdge;
 import cells.ICell;
 import cells.LIF;
+import cells.Module;
 import cells.Multimeter;
 import cells.Raster;
 import edges.AbstractEdge;
 import edges.DetectorEdge;
 import edges.Synapse;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import javafx.collections.FXCollections;
 
 import layout.Layout;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Shape;
@@ -31,10 +39,11 @@ public class Graph {
     private final Model model;
     private final PannableCanvas pannableCanvas;
     private final Map<IGraphNode, Shape> graphics;
-    private final NodeGestures nodeGestures;
+    private final ObservableList<Button> resizeButtons;
     private final ViewportGestures viewportGestures;
-    private final BooleanProperty useNodeGestures;
     private final BooleanProperty useViewportGestures;
+    
+    private static final long serialVersionUID = 15L;
 
     public Graph(MainApp app) {
         this(app, new Model());
@@ -45,18 +54,10 @@ public class Graph {
         this.model = model;
         this.model.setGraph(this);
         
-
-        nodeGestures = new NodeGestures(this);
-        useNodeGestures = new SimpleBooleanProperty(true);
-        useNodeGestures.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                model.getAllCells().forEach(cell -> nodeGestures.makeDraggable(getGraphic(cell)));
-            } else {
-                model.getAllCells().forEach(cell -> nodeGestures.makeUndraggable(getGraphic(cell)));
-            }
-        });
+        resizeButtons = FXCollections.observableArrayList();
 
         pannableCanvas = new PannableCanvas();
+        
         viewportGestures = new ViewportGestures(pannableCanvas);
         useViewportGestures = new SimpleBooleanProperty(true);
         useViewportGestures.addListener((obs, oldVal, newVal) -> {
@@ -89,8 +90,6 @@ public class Graph {
 
         graphics = new HashMap<>();
         
-        System.out.println("cells in model: "+model.getAllCells().size());
-        System.out.println("Edges in model: "+model.getAllEdges().size());
     }
 
     public Map<IGraphNode, Shape> getGraphics() {
@@ -117,18 +116,18 @@ public class Graph {
         for (IEdge edge : edges) {
             addEdge(edge, addToModel, false);
         }
-        cellsToFront();
+        updateZLayout();
     }
-    
-    public void addEdge(IEdge edge, boolean addToModel, boolean cellsToFront) {
+
+    public void addEdge(IEdge edge, boolean addToModel, boolean updateZLayout) {
         Shape graphic = getGraphic(edge);
         pannableCanvas.getChildren().add(graphic);
         if (addToModel) {
             model.addEdge(edge);
         }
-        
-        if (cellsToFront) {
-            cellsToFront();
+
+        if (updateZLayout) {
+            updateZLayout();
         }
     }
 
@@ -141,9 +140,7 @@ public class Graph {
     public void addCell(ICell cell, boolean addToModel) {
         Shape graphic = getGraphic(cell);
         pannableCanvas.getChildren().add(graphic);
-        if (useNodeGestures.get()) {
-            nodeGestures.makeDraggable(graphic);
-        }
+        
         if (addToModel) {
             model.addCell(cell);
         }
@@ -168,14 +165,6 @@ public class Graph {
         layout.execute(this);
     }
 
-    public NodeGestures getNodeGestures() {
-        return nodeGestures;
-    }
-
-    public BooleanProperty getUseNodeGestures() {
-        return useNodeGestures;
-    }
-
     public ViewportGestures getViewportGestures() {
         return viewportGestures;
     }
@@ -183,21 +172,12 @@ public class Graph {
     public BooleanProperty getUseViewportGestures() {
         return useViewportGestures;
     }
-
-    private void cellsToFront() {
-        for (Map.Entry<IGraphNode, Shape> graphic : graphics.entrySet()) {
-            if (graphic.getKey() instanceof AbstractCell) {
-                graphic.getValue().toFront();
-            }
-        }
-    }
     
     public void removeCell(ICell cell) {
         Shape cellGraphic = getGraphic(cell);
         pannableCanvas.getChildren().remove(cellGraphic);
         model.removeConnectedEdges(cell);
         model.removeCell(cell);
-        
         
     }
     
@@ -212,4 +192,48 @@ public class Graph {
             removeEdge(edge);
         }
     }
+    
+    public void removeModule(Module aThis) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Entry<T, E> entry : map.entrySet()) {
+            if (Objects.equals(value, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    public void addResizeButton(Button resizeButton) {
+        resizeButtons.add(resizeButton);
+        pannableCanvas.getChildren().add(resizeButton);
+    }
+
+    public void removeResizeButton(Button resizeButton) {
+        resizeButtons.remove(resizeButton);
+        pannableCanvas.getChildren().remove(resizeButton);
+    }
+    
+    public void updateZLayout() {
+        ObservableList<ICell> cells = model.getAllCells();
+        ObservableList<IEdge> edges = model.getAllEdges();
+        List<IGraphNode> graphNodes = new ArrayList();
+        graphNodes.addAll(cells);
+        graphNodes.addAll(edges);
+        
+        Collections.sort(graphNodes, IGraphNode.ZLEVEL_COMPARATOR);
+        
+        for (IGraphNode graphNode : graphNodes) {
+            graphNode.getGraphic(this).toFront();
+            
+            if (graphNode instanceof Module) {
+                ((Module) graphNode).getResizeButton().toFront();
+            }
+            
+        }
+    }
 }
+
+

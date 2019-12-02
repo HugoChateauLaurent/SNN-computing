@@ -38,7 +38,7 @@ import javafx.scene.text.Text;
 public class DetectorEdge extends AbstractEdge {
     
     private static int count = 1;
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 13L;
 
     public DetectorEdge(Model model, AbstractNode target, AbstractDetector detector) {
         super(model, target, detector, count);
@@ -90,6 +90,10 @@ public class DetectorEdge extends AbstractEdge {
     }
     
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
 }

@@ -1,33 +1,55 @@
 package graph;
 
 import cells.AbstractCell;
+import cells.AbstractDetector;
 import cells.ICell;
 import cells.LIF;
+import cells.Module;
 import cells.Multimeter;
 import cells.Raster;
+import edges.AbstractEdge;
 import edges.DetectorEdge;
+import edges.IEdge;
 import edges.Synapse;
 import java.awt.Canvas;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import layout.RandomLayout;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -36,7 +58,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPane.Divider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -51,6 +75,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import serialization.INet;
 import serialization.Serialization;
 import visualizer.AbstractVisualizer;
 import visualizer.MultimeterVisualizer;
@@ -85,8 +110,6 @@ public class MainApp extends Application {
         
         menu = makeMenu(primaryStage);
         
-        System.out.println(graph);
-        System.out.println(graph.getCanvas());
         PannableCanvas graph_workspace = graph.getCanvas();
         
         HBox visualizers_hbox = new HBox();
@@ -111,7 +134,6 @@ public class MainApp extends Application {
         primaryStage.show();
         
         //exampleElements();
-        updateHierarchy();
         
     }
 
@@ -126,10 +148,6 @@ public class MainApp extends Application {
     public ScrollPane getVisualizers() {
         return visualizers;
     }
-    
-    public void updateHierarchy() {
-        menu.toFront();
-    }
 
     private MenuBar makeMenu(Stage stage) {
         MainApp app = this;
@@ -140,10 +158,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                System.out.println("Opening default network");
-                Serialization serialization = openFile(DEFAULT_FILE);
+                Serialization serialization = (Serialization) openFile(DEFAULT_FILE);
                 if (serialization != null) {
-                    System.out.println("Opening model");
                     load_serialization(serialization);
                 } else {
                     System.out.println("Null serialization");
@@ -156,13 +172,27 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                System.out.println("Open");
-                Serialization serialization = chooseAndOpenFile(stage);
-                if (serialization != null) {
-                    System.out.println("Opening model");
-                    load_serialization(serialization);
+                Object openFile = chooseAndOpenFile(stage, false);
+                if (openFile instanceof Serialization) {
+                    load_serialization((Serialization) openFile);
+                } else if (openFile instanceof BufferedReader) {
+                    load_inet((BufferedReader) openFile, false);
                 } else {
-                    System.out.println("Null serialization");
+                    System.out.println("Can't open file");
+                }
+            }
+        });
+        menu.getItems().add(item);
+        
+        item = new MenuItem("Append .inet to current network");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                Object openFile = chooseAndOpenFile(stage, true);
+                if (openFile instanceof BufferedReader) {
+                    load_inet((BufferedReader) openFile, true);
+                } else {
+                    System.out.println("Can't open file");
                 }
             }
         });
@@ -172,10 +202,8 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                System.out.println("Save");
                 boolean save = true;
                 if (saveFile == null || saveFile.getName().equals(DEFAULT_FILE.getName())) {
-                    System.out.println("Calling save as");
                     save = app.saveAs(stage);
                 }
                 if (save) {
@@ -190,7 +218,6 @@ public class MainApp extends Application {
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
-                System.out.println("Save as");
                 boolean save = app.saveAs(stage);
                 if (save) {
                     app.save();
@@ -226,7 +253,7 @@ public class MainApp extends Application {
         });
         menu.getItems().add(item);
         
-        item = new MenuItem("Random generator");
+        item = new MenuItem("Random spiker");
         item.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent t) {
@@ -259,6 +286,33 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
+        
+        item = new MenuItem("Modules");
+        item.setDisable(true);
+        item.getStyleClass().add("context-menu-title");
+        menu.getItems().add(item);
+        
+        item = new MenuItem("Module");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                graph.getModel().createModule();
+            }
+        });
+        menu.getItems().add(item);
+        
+        item = new MenuItem("Import module");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                File openFile = (File) chooseModule(primaryStage);
+                if (openFile != null) {
+                    importModule(openFile);
+                }
+            }
+        });
+        menu.getItems().add(item);
+        
         menuBar.getMenus().add(menu);
 
         menu = new Menu("Layout");
@@ -289,6 +343,27 @@ public class MainApp extends Application {
             }
         });
         menu.getItems().add(item);
+        menuBar.getMenus().add(menu);
+        
+        menu = new Menu("About");
+        item = new MenuItem("Help");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent t) {
+                Alert help_dialog = new Alert(AlertType.INFORMATION);
+                help_dialog.setTitle("Help");
+                help_dialog.setHeaderText("Hotkeys and shortcuts");
+                help_dialog.setContentText(""
+                        + "- Right click on an element to open its menu\n"
+                        + "- Scroll to zoom in and out\n"
+                        + "- Hold right click and drag to navigate\n"
+                        + "- To connect A to B, double click on A first,\n"
+                        + "   then double click on B\n");
+                help_dialog.showAndWait();
+            }
+        });
+        menu.getItems().add(item);
+        
         menuBar.getMenus().add(menu);
         
         return menuBar;
@@ -359,6 +434,8 @@ public class MainApp extends Application {
         if (newSaveFile != null && (newSaveFile.getName().endsWith(EXTENSION_NAMES.getKey()) || newSaveFile.getName().endsWith(EXTENSION_NAMES.getValue())) && !newSaveFile.getName().equals(DEFAULT_FILE.getName())) {
             saveFile = newSaveFile;
             updateTitle();
+            setNETWORKS_DIRECTORY(saveFile, true);
+            
             return true;
         } else if (newSaveFile.getName().equals(DEFAULT_FILE.getName())) {		
                 System.out.println("Cannot override default file");		
@@ -373,7 +450,6 @@ public class MainApp extends Application {
 
     private void save() {
         try {
-            System.out.println("Save: "+saveFile.getName());
             
             if (saveFile.getName().endsWith(EXTENSION_NAMES.getKey())) {
                 FileOutputStream fileOut = new FileOutputStream(saveFile);
@@ -383,39 +459,48 @@ public class MainApp extends Application {
                 objectOut.close();
             } else {
                 PrintWriter out = new PrintWriter(saveFile);
-                out.println(graph.getModel().to_inet());
+                INet inet_interface = new INet(graph);
+                out.println(inet_interface.write());
                 out.close();
             }
             
-            System.out.println("The Object was succesfully written to a file");
  
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
     
-    private Serialization openFile(File openFile) {
+    private Object openFile(File openFile) {
  
         try {
             if(openFile != null) {
-                System.out.println(openFile.getAbsolutePath());
- 
-                FileInputStream fileIn = new FileInputStream(openFile);
-                System.out.println("fileIn "+fileIn);
-                ObjectInputStream objectIn = new ObjectInputStream(fileIn);
-                System.out.println("objectIn "+objectIn);
+                if (openFile.getName().endsWith(EXTENSION_NAMES.getKey())) {
 
-                Object obj = (Serialization) objectIn.readObject();
-                objectIn.close();
+                    FileInputStream fileIn = new FileInputStream(openFile);
+                    ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
-                if (obj instanceof Serialization) {
-                    System.out.println("Loading serialization");
+                    Object obj = (Serialization) objectIn.readObject();
+                    objectIn.close();
+
+                    if (obj instanceof Serialization) {
+                        saveFile = openFile;
+                        updateTitle();
+                        setNETWORKS_DIRECTORY(saveFile, true);
+                        return (Serialization) obj;
+                    } else {
+                        System.out.println("Cannot load object, not a Serialization: "+obj);
+                        return null;
+                    }
+                } else if (openFile.getName().endsWith(EXTENSION_NAMES.getValue())) {
                     saveFile = openFile;
                     updateTitle();
-                    return (Serialization) obj;
+                    setNETWORKS_DIRECTORY(saveFile, true);
+                    
+                    BufferedReader br = new BufferedReader(new FileReader(openFile));
+                    return br;
+                    
                 } else {
-                    System.out.println("Cannot load object, not a Serialization: "+obj);
-                    return null;
+                    System.out.println("Unknwown file extension");
                 }
             }
  
@@ -425,17 +510,107 @@ public class MainApp extends Application {
         return null;
     }
     
-    private Serialization chooseAndOpenFile(Stage stage) {
+    private void importModule(File openFile) {
+ 
+        try {
+
+            FileInputStream fileIn = new FileInputStream(openFile);
+            ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+            Object obj = (Module) objectIn.readObject();
+            objectIn.close();
+            
+                
+
+            if (obj instanceof Module) {
+                
+                Module module = (Module) obj;
+                module.setParentModule(null);
+                module.setCells(FXCollections.observableSet(module.getSerializableCells()));
+                int moduleZLevel = module.getZLevel();
+                int maxZLevel = -1;
+                int zLevel;
+                
+                ArrayList<AbstractCell> cells = new ArrayList(module.getCellsAndChildren(true));
+                cells.add(0, module);
+                Module.setUpdateZLayout(false);
+                
+                for (AbstractCell cell : cells) {
+                    
+                    cell.setModel(this.graph.getModel());
+                    
+                    //update ID and increase class count
+                    cell.setID(cell.getClassCount());
+                    cell.increaseCount();
+                    
+                    zLevel = cell.getZLevel() - moduleZLevel;
+                    cell.setZLevel(zLevel);
+                    
+                    cell.createView();
+                    graph.addCell(cell, true);
+                    
+                    if (cell instanceof AbstractDetector){
+                        ((AbstractDetector) cell).createVisualizer();
+                    }
+                
+                    
+                }
+                
+                module.fixLayout();
+                
+                for (AbstractEdge edge : module.getSerializableInternalEdges()) {
+                    
+                    edge.setModel(this.graph.getModel());
+                    
+                    //update ID and increase class count
+                    edge.setID(edge.getClassCount());
+                    edge.increaseCount();
+                    
+                    edge.createView();
+                    graph.addEdge(edge, true, false);
+                    
+                }
+                
+                Module.setUpdateZLayout(true);
+                graph.updateZLayout();
+
+
+                
+            } else {
+                System.out.println("Cannot load module: "+obj);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void setNETWORKS_DIRECTORY(File file, boolean take_parent) {
+        Path path = Paths.get(file.toString());
+        if (take_parent) {
+            path = path.getParent();
+        }
+        NETWORKS_DIRECTORY = path.toFile();
+    }
+    
+    public File getNETWORKS_DIRECTORY() {
+        return NETWORKS_DIRECTORY;
+    }
+    
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+    
+    private Object chooseAndOpenFile(Stage stage, boolean append_inet) {
  
         try {
             
             FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(EXTENSION_net);
+            if (!append_inet) {
+                fileChooser.getExtensionFilters().add(EXTENSION_net);
+            }
             fileChooser.getExtensionFilters().add(EXTENSION_inet);
             fileChooser.setInitialDirectory(NETWORKS_DIRECTORY);
-            fileChooser.setInitialFileName("default.net");
             
-            //Show save file dialog
             File openFile = fileChooser.showOpenDialog(stage);
             
             if(openFile != null) {
@@ -450,15 +625,107 @@ public class MainApp extends Application {
         return null;
     }
     
+    private Object chooseModule(Stage stage) {
+ 
+        try {
+            
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(Module.getEXTENSION());
+            
+            File openFile = fileChooser.showOpenDialog(stage);
+            
+            if(openFile != null) {
+                return openFile;
+            } else {
+                System.out.println("Null file");
+            }
+ 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
     public void load_serialization(Serialization serialization) {
+        
+        serialization.readCounts();
+        
         Model model = serialization.getModel();
+        
+        model.setAllCells(FXCollections.observableArrayList(model.getAllCellsSerialization()));
+        model.setAllEdges(FXCollections.observableArrayList(model.getAllEdgesSerialization()));
+        
+        // updating cells of modules manually because Module.readObject() is not working
+        for (ICell cell : model.getAllCells()) {
+            if (cell instanceof Module) {
+                ((Module) cell).setCells(FXCollections.observableSet(((Module) cell).getSerializableCells()));
+            }
+        }  
+        
         graph = new Graph(this, model);
         model.setGraph(graph);
+        
+        Module.setUpdateZLayout(false);
+        for (ICell c : model.getAllCells()) {
+            c.createView();
+        } for (IEdge e : model.getAllEdges()) {
+            e.createView();
+        }
+        Module.setUpdateZLayout(true);
+        graph.updateZLayout();
+        
+        for (ICell cell : model.getAllCells()) {
+            if (cell instanceof Module) {
+                if (cell.getZLevel() == 0) {
+                    ((Module) cell).fixLayout();
+                }
+            }
+        }  
+        
         graph.addCells(model.getAllCells(), false);
         graph.addEdges(model.getAllEdges(), false);
         
+        
+        
         model.createVisualizers(); 
-        System.out.println(graph.getGraphics().size());
+        
+        PannableCanvas graph_workspace = graph.getCanvas();
+        
+        HBox visualizers_hbox = new HBox();
+        visualizers_hbox.setSpacing(20);
+        visualizers = new ScrollPane();
+        
+        //visualizers.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        visualizers.setContent(visualizers_hbox);
+        
+        window = new SplitPane();
+        window.setOrientation(Orientation.VERTICAL);
+        window.getItems().add(menu);
+        window.getItems().add(graph_workspace);
+        window.getItems().add(visualizers);
+        window.setDividerPosition(0, 0f);
+        window.setDividerPosition(1, 0.7f);
+        
+        final Scene scene = new Scene(window, 1200, 900);
+        scene.getStylesheets().add(getClass().getResource("design.css").toExternalForm());
+
+        primaryStage.setScene(scene);
+        primaryStage.setMinHeight(500);
+        primaryStage.setMinWidth(750);
+        primaryStage.show();
+        
+        graph.layout(new RandomLayout());
+    }
+    
+    public void load_inet(BufferedReader cmds, boolean append) {
+        if (!append) {
+            graph = new Graph(this);
+        }
+        Model model = graph.getModel();
+        INet inet = new INet(graph);
+        inet.exec(cmds);
+        
+        model.createVisualizers(); 
         
         PannableCanvas graph_workspace = graph.getCanvas();
         

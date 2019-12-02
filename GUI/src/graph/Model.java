@@ -10,10 +10,12 @@ import cells.AbstractDetector;
 import cells.LIF;
 import cells.AbstractNode;
 import cells.InputTrain;
+import cells.Module;
 import cells.Multimeter;
 import cells.RandomSpiker;
 import cells.Raster;
 import cells.Targetable;
+import edges.AbstractEdge;
 import edges.DetectorEdge;
 import edges.Synapse;
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -46,7 +49,7 @@ import javafx.util.Pair;
 
 public class Model implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 16L;
 
     private ArrayList<ICell> allCellsSerialization;
     private transient ObservableList<ICell> allCells;
@@ -59,6 +62,22 @@ public class Model implements Serializable {
     public Model() {
         // clear model, create lists
         clear();
+    }
+    
+    public void setAllCells(ObservableList<ICell> allCells) {
+        this.allCells = allCells;
+    }
+    
+    public ArrayList<ICell> getAllCellsSerialization() {
+        return allCellsSerialization;
+    }
+    
+    public void setAllEdges(ObservableList<IEdge> allEdges) {
+        this.allEdges = allEdges;
+    }
+    
+    public ArrayList<IEdge> getAllEdgesSerialization() {
+        return allEdgesSerialization;
     }
 
     public void setGraph(Graph graph) {
@@ -175,9 +194,10 @@ public class Model implements Serializable {
         allCells.add(cell);
     }
 
-    public void addSynapse(ICell pre, ICell post, double w, int d) {
+    public Synapse addSynapse(ICell pre, ICell post, double w, int d) {
         final Synapse connection = new Synapse(graph.getModel(), (AbstractNode) pre, (AbstractNode) post, w, d);
         graph.addEdge((IEdge) connection, true, true);
+        return connection;
     }
 
     public void addDetectorEdge(AbstractNode target, AbstractDetector detector) {
@@ -235,7 +255,6 @@ public class Model implements Serializable {
                 } else {
                     System.out.println("Cannot connect node to the same detector twice");
                 }
-
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
 
@@ -249,7 +268,6 @@ public class Model implements Serializable {
                 } else {
                     System.out.println("Cannot connect node to the same detector twice");
                 }
-
                 c2.updateToConnect(false);
                 c1.updateToConnect(false);
 
@@ -366,25 +384,40 @@ public class Model implements Serializable {
     public void createRandomSpiker() {
         final Pair<Double, Double> params = RandomSpiker.askParameters();
         if (params != null) {
-            final ICell random = new RandomSpiker(this, params.getKey(), params.getValue());
-            graph.addCell(random, true);
+            createRandomSpiker(params);
         }
+    }
+    
+    public RandomSpiker createRandomSpiker(Pair<Double, Double> params) {
+        final ICell random = new RandomSpiker(this, params.getKey(), params.getValue());
+        graph.addCell(random, true);
+        return (RandomSpiker) random;
     }
 
     public void createLIF() {
         final Double[] params = LIF.askParameters();
         if (params != null) {
-            final ICell lif = new LIF(this, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
-            graph.addCell(lif, true);
+            createLIF(params);
         }
+    }
+    
+    public LIF createLIF(Double[] params) {
+        final ICell lif = new LIF(this, params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+        graph.addCell(lif, true);
+        return (LIF) lif;
     }
 
     public void createInputTrain() {
         final Pair<double[], Boolean> params = InputTrain.askParameters();
         if (params != null) {
-            final ICell inputTrain = new InputTrain(this, params.getKey(), params.getValue());
-            graph.addCell(inputTrain, true);
+            createInputTrain(params);
         }
+    }
+    
+    public InputTrain createInputTrain(Pair<double[], Boolean> params) {
+        final ICell inputTrain = new InputTrain(this, params.getKey(), params.getValue());
+        graph.addCell(inputTrain, true);
+        return (InputTrain) inputTrain;
     }
 
     public Multimeter createMultimeter() {
@@ -393,6 +426,11 @@ public class Model implements Serializable {
         graph.addCell(multimeter, true);
         return multimeter;
     }
+    
+    public void createModule() {
+        final Module module = new Module(this);
+        graph.addCell(module, true);
+    }
 
     private void init() {
         for (ICell cell : allCells) {
@@ -400,13 +438,22 @@ public class Model implements Serializable {
         }
     }
 
-    private void readObject(ObjectInputStream aInputStream)
+    /*private void readObject(ObjectInputStream aInputStream)
             throws ClassNotFoundException, IOException {
         aInputStream.defaultReadObject();
         allCells = FXCollections.observableArrayList(allCellsSerialization);
         allEdges = FXCollections.observableArrayList(allEdgesSerialization);
+        
+        // updating cells of modules manually because Module.readObject() is not working
+        for (ICell cell : allCells) {
+            if (cell instanceof Module) {
+                ((Module) cell).setCells(FXCollections.observableSet(((Module) cell).getSerializableCells()));
+            }
+        }
+        
+        
 
-    }
+    }*/
 
     private void writeObject(ObjectOutputStream aOutputStream)
             throws IOException {
@@ -477,70 +524,41 @@ public class Model implements Serializable {
         return false;
 
     }
-
-    public String to_inet() {
-        StringBuilder elements = new StringBuilder();
-        
-        
-        //nodes
-        for (AbstractNode node : getAllNodes()) {
-            elements.append(node.toString());
-            elements.append("\n");
+    
+    public AbstractCell getCellByID(String string) {
+        String[] splitted = string.split("\\s+");
+        if (splitted.length != 2) {
+            System.out.println("Invalid ID: "+string);
+            return null;
         }
-
-        elements.append("\n\n");
-        //detectors
-        for (AbstractDetector detector : getAllDetectors()) {
-            elements.append(detector.toString());
-            elements.append("\n");
-        }
-
-        elements.append("\n\n");
-        //synapses
-        for (Synapse synapse : getAllSynapses()) {
-            elements.append(synapse.toString());
-            elements.append("\n");
-        }
-
-        elements.append("\n\n");
         
-        elements.append("inet['network'] = Network([");
-        boolean start = true;
-        for (AbstractNode node : getAllNodes()) {
-            if (!start) {
-                elements.append(", ");
-            } else {
-                start = false;
+        int ID = Integer.parseInt(splitted[1]);
+        Class c = null;
+        if (splitted[0] == "LIF") {
+            c = LIF.class;
+        } else if (splitted[0] == "Module") {
+            c = Module.class;
+        } else if (splitted[0] == "Multimeter") {
+            c = Multimeter.class;
+        } else if (splitted[0] == "Raster") {
+            c = Raster.class;
+        } else {
+            System.out.println("Invalid ID: "+string);
+            return null;
+        }
+        
+        AbstractCell aCell;
+        for (ICell cell : allCells) {
+            if (cell instanceof AbstractCell) {
+                aCell = (AbstractCell) cell;
+                if (aCell.getClass().isInstance(c) && aCell.getID() == ID) {
+                    return aCell;
+                }
             }
             
-            elements.append(node.getClassAndID(true));
         }
+        System.out.println("Cannot find cell "+string);
+        return null;
         
-        elements.append("], [");
-        start = true;
-        for (Synapse synapse : getAllSynapses()) {
-            if (!start) {
-                elements.append(", ");
-            } else {
-                start = false;
-            }
-            
-            elements.append(synapse.getClassAndID(true));
-        }
-        
-        elements.append("])\ninet['simulator'] = Simulator(inet['network'], [");
-        start = true;
-        for (AbstractDetector detector : getAllDetectors()) {
-            if (!start) {
-                elements.append(", ");
-            } else {
-                start = false;
-            }
-            
-            elements.append(detector.getClassAndID(true));
-        }
-        elements.append("])");
-        
-        return elements.toString();
     }
 }

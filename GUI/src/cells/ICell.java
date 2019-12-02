@@ -3,6 +3,9 @@ package cells;
 import graph.Graph;
 import edges.IEdge;
 import graph.IGraphNode;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -48,4 +51,9 @@ public interface ICell extends IGraphNode {
     public void decreaseID();
 
     public int getID();
+    
+    public abstract int getZLevel();
+    
+    public void createView();
+    
 }

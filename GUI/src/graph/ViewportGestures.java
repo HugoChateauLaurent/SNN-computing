@@ -15,6 +15,8 @@ public class ViewportGestures implements Serializable {
     private final DoubleProperty zoomSpeedProperty = new SimpleDoubleProperty(1.2d);
     private final DoubleProperty maxScaleProperty = new SimpleDoubleProperty(10.0d);
     private final DoubleProperty minScaleProperty = new SimpleDoubleProperty(0.1d);
+    
+    private static final long serialVersionUID = 18L;
 
     private final PannableCanvas.DragContext sceneDragContext = new PannableCanvas.DragContext();
 

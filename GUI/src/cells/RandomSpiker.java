@@ -2,6 +2,7 @@ package cells;
 
 import graph.Graph;
 import graph.Model;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class RandomSpiker extends AbstractNode {
     
     private static int count = 1;
     
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 10L;
     
     private boolean toConnect = false;
     
@@ -53,6 +54,8 @@ public class RandomSpiker extends AbstractNode {
     
     public void createView() {
         view = new Ellipse(50, 50);
+        cellGestures = new CellGestures(model.getGraph(), this);
+        cellGestures.makeDraggable();
     }
     
     
@@ -62,10 +65,9 @@ public class RandomSpiker extends AbstractNode {
         
     }
     
-    @Override
-    public String toString() {
+    public String to_inet() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName()+"_"+ID+ " = "+getClass().getSimpleName()+"(");
+        sb.append(getClass().getSimpleName()+"_"+ID+ " = network.create"+getClass().getSimpleName()+"(");
         sb.append(Double.toString(p)+", ");
         sb.append(Double.toString(amplitude)+")");
         
@@ -167,6 +169,10 @@ public class RandomSpiker extends AbstractNode {
     }
     
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
 

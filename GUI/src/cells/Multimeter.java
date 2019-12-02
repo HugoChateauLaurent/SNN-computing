@@ -10,6 +10,7 @@ import cells.AbstractNode;
 import graph.Graph;
 import graph.MainApp;
 import graph.Model;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +31,7 @@ import visualizer.MultimeterVisualizer;
  */
 public class Multimeter extends AbstractDetector {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 9L;
 
     private static int count = 1;
 
@@ -81,6 +82,10 @@ public class Multimeter extends AbstractDetector {
     }
 
     public static int getCount() {
+        return count;
+    }
+    
+    public int getClassCount() {
         return count;
     }
 

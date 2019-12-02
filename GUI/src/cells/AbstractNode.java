@@ -28,6 +28,8 @@ public abstract class AbstractNode extends AbstractCell implements Detectable {
     protected double amplitude;
     protected Random rng;
     
+    private static final long serialVersionUID = 4L;
+    
     public AbstractNode(double amplitude, int ID, Model model) {
         this.amplitude = amplitude;
         this.rng = new Random();
@@ -77,9 +79,11 @@ public abstract class AbstractNode extends AbstractCell implements Detectable {
         ID_label.getStyleClass().add("context-menu-title");
 
         if (this instanceof LIF) {
-            ID_label.setText("LIF " + Integer.toString(ID));
+            ID_label.setText("LIF " + Integer.toString(ID)+" z"+zLevel);
         } else if (this instanceof InputTrain) {
-            ID_label.setText("Input Train " + Integer.toString(ID));
+            ID_label.setText("Input Train " + Integer.toString(ID)+" z"+zLevel);
+        } else if (this instanceof RandomSpiker) {
+            ID_label.setText("Random spiker " + Integer.toString(ID)+" z"+zLevel);
         } else {
             System.out.println("Unknown AbstractNode: cannot ID_label");
         }
