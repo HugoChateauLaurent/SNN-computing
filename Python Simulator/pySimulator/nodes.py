@@ -76,7 +76,7 @@ class LIF(AbstractNeuron):
 			self.V += self.rng.normal(scale=self.noise) # add noise
 		self.V = max(self.V_min, self.V)
 		self.I = self.I_e # reset I with I_e
-		if self.V > self.thr: # check for spike
+		if self.V >= self.thr: # check for spike
 			self.V = self.V_reset
 			self.out = self.amplitude
 		else:
