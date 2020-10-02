@@ -1,7 +1,7 @@
 package cells;
 
 import cells.CellGestures.ResizeContext;
-import static com.sun.deploy.util.SessionState.save;
+//import static com.sun.deploy.util.SessionState.save;
 import edges.AbstractEdge;
 import edges.IEdge;
 import graph.Graph;
