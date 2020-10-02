@@ -42,13 +42,15 @@ class Raster():
 			# orientation horizontal baseline, could replace with grid
 			plt.axhline(1+idx, color="black")
 
-			# formatting
-			plt.xticks(x)
-			plt.ylim((0.5, count+0.5))
-			plt.xlabel("Steps")
-			plt.ylabel("Targets")
-			# use ID of targets as Y-Ticks
-			plt.yticks(range(1,count+1), [t.ID for t in self.targets])
+		# 
+		plt.grid(which="major", axis="x")
+		# formatting
+		plt.xticks(x)
+		plt.ylim((0.5, count+0.5))
+		plt.xlabel("Steps")
+		plt.ylabel("Targets")
+		# use ID of targets as Y-Ticks
+		plt.yticks(range(1,count+1), [t.ID for t in self.targets])
 		
 
 	def addTarget(self, target):
