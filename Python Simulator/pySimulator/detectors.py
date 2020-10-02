@@ -91,13 +91,14 @@ class Multimeter():
 		steps, count = self.V.shape
 		fig, ax = plt.subplots(count, 1, figsize=(10,2*count), sharex=True)
 		ax.flatten()
-		for idx in range(count):
+		for i in range(count):
+			idx = count - i - 1
 			target = self.targets[idx]
-			ca = ax[idx]
+			ca = ax[i]
 			ca.plot(self.V[:, idx], "o-", color="black")
 
 			# formatting
-			ca.set_ylabel("Voltage " + target.ID)
+			ca.set_ylabel(f"Voltage {target.ID}")
 			padding = .1 * target.thr
 			top = target.thr + padding
 			bot = target.V_min - padding
