@@ -25,9 +25,33 @@ class Raster():
 		self.index += 1
 
 	def plot(self):
-		plt.matshow(self.spikes.T, cmap='gray', fignum=1)
+		steps, count = self.spikes.shape
+		# slightly increase width and scale height to amount of targets
+		# default figsize is 6.4*4.8 inches
+		fig = plt.figure(figsize=(10,count))
+		x = np.array(range(steps))
+		for idx in range(count):
+			# get target spikes and make 1D
+			y = self.spikes[:, idx].flatten()
+			indices = y.nonzero()
+			# plot each spike as one line
+			plt.scatter(
+				x[indices], y[indices] + idx,
+				 s=600, marker="|", color="black"
+			)
+			# orientation horizontal baseline, could replace with grid
+			plt.axhline(1+idx, color="black")
+
+		# 
+		plt.grid(which="major", axis="x")
+		# formatting
+		plt.xticks(x)
+		plt.ylim((0.5, count+0.5))
+		plt.xlabel("Steps")
 		plt.ylabel("Targets")
-		plt.xlabel("Step")
+		# use ID of targets as Y-Ticks
+		plt.yticks(range(1,count+1), [t.ID for t in self.targets])
+		
 
 	def addTarget(self, target):
 		self.targets.append(target)
@@ -65,14 +89,27 @@ class Multimeter():
 		self.index += 1
 
 	def plot(self):
-		for i in range(len(self.targets)):
-			plt.subplot(len(self.targets),1,1+i)
-			plt.plot(self.V[:,i])
-			plt.ylabel("Voltage "+str(i+1))
-			plt.ylim(top=self.targets[i].thr)
-			#plt.xticks(range(duration))
+		# slightly increase width and scale height to amount of targets
+		steps, count = self.V.shape
+		fig, ax = plt.subplots(count, 1, figsize=(10,2*count), sharex=True)
+		ax.flatten()
+		for i in range(count):
+			idx = count - i - 1
+			target = self.targets[idx]
+			ca = ax[i]
+			ca.plot(self.V[:, idx], "o-", color="black")
 
-		plt.xlabel("Step")
+			# formatting
+			ca.set_ylabel(f"Voltage {target.ID}")
+			padding = .1 * target.thr
+			top = target.thr + padding
+			bot = target.V_min - padding
+			ca.set_ylim((bot, top))
+			ca.grid(b=True, which='major', color='#d3d3d3', linestyle='-')
+			ca.set_xticks(range(steps))
+			ca.set_yticks(range(target.V_min, target.thr + 1))
+
+		ca.set_xlabel("Step")
 
 	def addTarget(self, target):
 		self.targets.append(target)
