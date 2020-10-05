@@ -4,17 +4,26 @@ about: Suggest an idea for this project
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### One-sentence description
+<!-- Describe the feature you want to see added in one sentence. -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+### Desired functionality
+<!-- Describe the feature you want to see added in detail. -->
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+
+### Motivation
+<!-- Why does this feature need to be added?. -->
+*    As: (customer)
+*   I want: (description of what needs to be developed)
+*   So that I can: (description of why that needs to be developed)
+
+Example:
+As a system administrator, I want to be able to create repositories by clicking on a button, so that I can easily create and see the newly created repositories.
+
+
+
+### Suggested implementation
+<!-- Please share your suggestions on the technical implementation of this feature, if you have them. -->
