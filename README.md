@@ -13,5 +13,6 @@ To run an example network, open up a terminal in the project directory and run t
 
 `python '.\Python Simulator\test_inet.py' -f ".\Python Simulator\examples\addcircuit.py" -d 11`
 
-You should be presented with a read out from the connected measuring tools.
+You should be presented with a read out from the connected measuring tools like this:
+
 ![Default Readout](defaultreadout.png)
