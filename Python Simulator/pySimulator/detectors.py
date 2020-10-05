@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 
 class Raster():
@@ -24,10 +25,11 @@ class Raster():
 		self.spikes[self.index,:] = [target.out > 0 for target in self.targets]
 		self.index += 1
 
-	def plot(self):
-		plt.matshow(self.spikes.T, cmap='gray', fignum=1)
-		plt.ylabel("Targets")
-		plt.xlabel("Step")
+	def get_measurements(self):
+		return self.spikes
+	
+	def get_labels(self):
+		return [t.ID for t in self.targets]
 
 	def addTarget(self, target):
 		self.targets.append(target)
@@ -64,15 +66,11 @@ class Multimeter():
 		self.V[self.index,:] = 	[target.V for target in self.targets]
 		self.index += 1
 
-	def plot(self):
-		for i in range(len(self.targets)):
-			plt.subplot(len(self.targets),1,1+i)
-			plt.plot(self.V[:,i])
-			plt.ylabel("Voltage "+str(i+1))
-			plt.ylim(top=self.targets[i].thr)
-			#plt.xticks(range(duration))
-
-		plt.xlabel("Step")
+	def get_measurements(self):
+		return self.V
+	
+	def get_labels(self):
+		return [t.ID for t in self.targets]
 
 	def addTarget(self, target):
 		self.targets.append(target)
