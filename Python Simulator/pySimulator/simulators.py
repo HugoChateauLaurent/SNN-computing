@@ -83,7 +83,7 @@ class Simulator():
 
 		for i in range(nvd):
 			fig.axes[i+2].plot(measurements[1][:,i])
-			fig.axes[i+2].set_ylabel(self.detectors[0].targets[i].ID)
+			fig.axes[i+2].set_ylabel(self.detectors[1].targets[i].ID)
 			fig.axes[i+2].set_ylim(top=(max(measurements[1].T[i])+0.5))
 			fig.axes[i+2].grid(b=None, which='major')
 			fig.axes[i+2].xaxis.set_major_locator(ticker.MultipleLocator(1))
