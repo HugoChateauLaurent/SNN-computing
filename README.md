@@ -1,5 +1,5 @@
 # Radboud SNN Simulator
-This is a legacy repository. The projected is now maintained at the [gitlab](https://gitlab.socsci.ru.nl/snnsimulator/simsnn) server of the social science faculty of Radboud University.
+This is a legacy repository. The project is now maintained at the [gitlab](https://gitlab.socsci.ru.nl/snnsimulator/simsnn) server of the social science faculty of Radboud University.
 
 ## Usage
 ### On Google Colab
